@@ -1,0 +1,31 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to CoW Interface</title>
+    <link rel="stylesheet" href="{% static 'converter/styles.css' %}">
+</head>
+<body>
+    <div class="screen-container">
+        <form method="POST" enctype="multipart/form-data" class="form-box">
+            {% csrf_token %}
+            <h1 class="welcome_title">Welcome to Smart Cow</h1>
+
+            <input type="text" name="api_endpoint" placeholder="Optional: Insert API endpoint" class="api-input">
+
+            <label for="csv_file" class="file-button">Select File</label>
+            <input type="file" name="csv_file" id="csv_file" accept=".csv" class="file-input">
+
+            <div class="file-label">
+                {{ file_name|default:"No File Selected" }}
+            </div>
+
+            <button type="submit" class="convert-button">Convert</button>
+        </form>
+    </div>
+
+    <!-- Link the JS file -->
+    <script src="{% static 'converter/main.js' %}"></script>
+</body>
+</html>
