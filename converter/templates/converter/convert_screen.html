@@ -9,6 +9,35 @@
 <body>
   <div class="converter-container">
     
+    <!-- Full Dataset Popup-->
+    <div class="popup" id="dataset_popup">
+      <div class="dataset_content">
+        <div class="popup-header">
+          <h2 class="popup-title">Full Dataset</h2>
+        </div>
+        <table class="csv-table">
+          <thead>
+            <tr>
+              {% for header in headers %}
+                <th>{{ header }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in full_table %}
+              <tr>
+                {% for cell in row %}
+                  <td>{{ cell }}</td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <button class="close-button" onclick="closeDatasetForm()">Close</button>
+      </div>
+    </div>
+
+
     <!-- LEFT: CSV Preview -->
     <section class="panel panel-left">
       <h2 class="panel-title">CSV Preview</h2>
@@ -32,11 +61,9 @@
         </tbody>
       </table>
     
-      <form method="get">
-        {% if not full_table %}
-          <button type="submit" name="full" value="true" class="load-button">Load Full Dataset</button>
-        {% endif %}
-      </form>
+
+      <button type="button" class="load-button" onclick="openDatasetForm()">Load Full Dataset</button>
+  
     </section>
 
     <!-- MIDDLE: Vocabulary Recommender -->
@@ -50,5 +77,6 @@
     </section>
 
   </div>
+  <script src="{% static 'converter/main.js' %}"></script>
 </body>
 </html>

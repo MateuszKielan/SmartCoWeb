@@ -8,3 +8,17 @@ fileInput.addEventListener("change", () => {
 
     //fileInput.form.submit();
 })
+
+// Function to open the popup modal
+
+function openDatasetForm() {
+    const popup = document.getElementById('dataset_popup');
+
+    popup.style.display = 'block';
+}
+
+function closeDatasetForm() {
+    const popup = document.getElementById('dataset_popup');
+
+    popup.style.display = 'none';
+}

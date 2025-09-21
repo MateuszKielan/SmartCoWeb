@@ -26,11 +26,9 @@ def convert_screen_view(request):
         headers = all_rows[0]
         data_rows = all_rows[1:]
 
-        if request.GET.get("full") == "true":
-            preview_rows = data_rows
-            full_table = True
-        else:
-            preview_rows = data_rows[:20]
+        
+        full_table = data_rows
+        preview_rows = data_rows[:20]
 
     return render(request, "converter/convert_screen.html", {
         "headers": headers,
