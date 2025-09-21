@@ -9,14 +9,14 @@ fileInput.addEventListener("change", () => {
     //fileInput.form.submit();
 })
 
-// Function to open the popup modal
-
+// Function to open the popup 
 function openDatasetForm() {
     const popup = document.getElementById('dataset_popup');
 
     popup.style.display = 'block';
 }
 
+// Function to close the popup 
 function closeDatasetForm() {
     const popup = document.getElementById('dataset_popup');
 

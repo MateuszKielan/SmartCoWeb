@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 def convert_screen_view(request):
     preview_rows = []
     full_table = False
+    json_content = ""
 
     # The uploaded CSV path should be passed via session or passed in request.GET
     csv_path = request.session.get("csv_path")
@@ -30,10 +31,23 @@ def convert_screen_view(request):
         full_table = data_rows
         preview_rows = data_rows[:20]
 
+    # Load JSON metadata file
+    json_path = csv_path.replace('.csv', '-metadata.json')
+    if os.path.exists(json_path):
+        try:
+            with open(json_path, 'r', encoding='utf-8') as json_file:
+                json_content = json_file.read()
+        except Exception as e:
+            logger.error(f"Error reading JSON file: {e}")
+            json_content = "Error loading JSON metadata file"
+    else:
+        json_content = "No JSON metadata file found"
+
     return render(request, "converter/convert_screen.html", {
         "headers": headers,
         "rows": preview_rows,
-        "full_table": full_table
+        "full_table": full_table,
+        "json_content": json_content
     })
 
 

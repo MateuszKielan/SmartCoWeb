@@ -100,20 +100,196 @@ body, html {
   /* Middle Panel: Recommender */
   .panel-middle {
     flex: 1.2;
-    background-color: #f7f7f7;
+    background-color: #F2F2F2;
     border-right: 1px solid #ccc;
   }
+  .solid-separator {
+    border-top: 1px solid black;
+    width: 100%;
+  }
   
+  .request-type-separator {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .sub-title {
+    font-weight: 500;
+    font-size: 17px;
+  }
+
+  .helper-button {
+    width: 2vw;
+    height: 2vw;
+    color: #ffff;
+    background-color: #8A8A8A;
+  }
+
+  .request-type-container {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  .request-type-button {
+    margin-top: 60px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    flex: 1;
+    background-color: #2196F3;
+    color: #ffff;
+  }
+
+  .replace-all-container {
+    margin-top: 60px;
+    margin-bottom: 60px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .replace-all-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    background-color: #2196F3;
+    color: #ffff;
+    flex: 0.5;
+  }
+
+  .card-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 50px;
+    padding: 20px;
+  }
+  
+  /* Individual card */
+  .card {
+    background-color: white;
+    border-radius: 15px;
+    padding: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+    width: 85%;
+  }
+
+  .card:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Card content text */
+  .card p {
+    margin: 8px 0;
+    color: #333;
+    font-size: 14px;
+  }
+  
+  /* Centered button */
+  .card-button {
+    display: block;
+    margin: 20px auto 0 auto;
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s ease;
+  }
+  
+  .card-button:hover {
+    background-color: #1976D2;
+  }
+
   /* Right Panel: JSON */
   .panel-right {
     flex: 1;
-    background-color: #e0e0e0;
+    background-color: #8A8A8A;
+  }
+
+  /* JSON Preview Styling */
+  .json-preview-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 120px);
+  }
+
+  .json-textarea {
+    flex: 1;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+    resize: vertical;
+    background-color: #f9f9f9;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .json-textarea:focus {
+    outline: none;
+    border-color: #2196F3;
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+  }
+
+  .json-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    justify-content: center;
+  }
+
+  .json-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    flex: 1;
+  }
+
+  .save-button {
+    background-color: #4CAF50;
+    color: white;
+    height: 100%;
+  }
+
+  .save-button:hover {
+    background-color: #45a049;
+  }
+
+  .convert-button {
+    background-color: #2196F3;
+    color: white;
+    height: 100%;
+  }
+
+  .convert-button:hover {
+    background-color: #1976D2;
   }
   
   /* Section Titles */
   .panel-title {
-    font-size: 1.4rem;
+    font-size: 2.8rem;
     font-weight: bold;
+    margin-top: 10px;
     margin-bottom: 20px;
     text-align: center
   }
