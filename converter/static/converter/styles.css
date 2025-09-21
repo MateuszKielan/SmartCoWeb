@@ -76,3 +76,78 @@ body, html {
     margin-bottom: 10px;
     font-size: 13px;
 }
+
+/* Layout for 3-part panel */
+.converter-container {
+    display: flex;
+    height: 100vh;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  
+  /* Shared styles for all panels */
+  .panel {
+    padding: 20px;
+    overflow-y: auto;
+  }
+  
+  /* Left Panel: CSV */
+  .panel-left {
+    flex: 1;
+    background-color: #eaeaea;
+    border-right: 1px solid #ccc;
+  }
+  
+  /* Middle Panel: Recommender */
+  .panel-middle {
+    flex: 1.2;
+    background-color: #f7f7f7;
+    border-right: 1px solid #ccc;
+  }
+  
+  /* Right Panel: JSON */
+  .panel-right {
+    flex: 1;
+    background-color: #e0e0e0;
+  }
+  
+  /* Section Titles */
+  .panel-title {
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center
+  }
+
+  .csv-table {
+    font-family: Arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  
+  .csv-table th, .csv-table td {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+  }
+  
+  .csv-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  
+  .load-button {
+    display: block;
+    margin: 0 auto;
+    padding: 10px 20px;
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .load-button:hover {
+    background-color: #1976D2;
+  }
+  
+  
