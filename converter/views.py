@@ -2,13 +2,34 @@ from email import header
 from django.shortcuts import render, redirect
 from django.conf import settings
 import os
-from .utils import convert_with_cow, get_csv_headers 
+import json
+from .utils import convert_with_cow, get_csv_headers, convert_json_to_nquads 
 from .metadata import update_metadata
-
+from pathlib import Path
 import logging
 from .engine import Engine
 import csv
+from django.http import JsonResponse
+
 logger = logging.getLogger(__name__)
+
+
+def convert_to_nquads_view(request):
+    if request.method == "POST":
+        csv_path_str = request.session.get('csv_path')
+
+        if not csv_path_str:
+            return JsonResponse({"status": "error", "message": "No CSV file found in session."}, status=400)
+
+        csv_path = Path(csv_path_str)
+
+        try:
+            convert_json_to_nquads(csv_path)
+            return JsonResponse({"status": "success", "message": "Converted to N-Quads successfully."})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+    return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
 
 
 def convert_screen_view(request):
@@ -49,7 +70,7 @@ def convert_screen_view(request):
         "headers": headers,
         "rows": preview_rows,
         "full_table": full_table,
-        "json_content": json_content
+        "json_content": json_content,
     })
 
 

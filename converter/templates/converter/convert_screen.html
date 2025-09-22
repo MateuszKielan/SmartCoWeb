@@ -39,6 +39,7 @@
     <!-- End Of Full Datase Popup Window-->
 
     <!-- HELPER POPUPS-->
+    <!-- Request Type Popup-->
     <div class="helper-popup" id="request-type-helper"> 
       <div class="helper-popup-content">
         <div class="helper-popup-header">
@@ -52,6 +53,7 @@
       </div>
     </div>
 
+    <!-- Vocabulary Recommender Popup -->
     <div class="helper-popup" id="vocabulary-recommender-helper"> 
       <div class="helper-popup-content">
         <div class="helper-popup-header">
@@ -61,6 +63,37 @@
           <p>Each card represents a column from your uploaded CSV file. It shows the column name, its detected data type, and how many unique values it contains. Use the 'Show Matches' button to view vocabulary suggestions tailored for that specific column.</p>
         </div>
         <button class="close-button" onclick="closeHelperPopup('vocabulary-recommender-helper')">Close</button>
+      </div>
+    </div>
+    
+    <!-- Matches Modal -->
+    <div class="match-popup" id="matchPopup">
+      <div class="match-popup-content table-popup">
+        <div class="match-popup-header">
+          <h2 class="match-popup-title" id="matchPopupTitle">Matches</h2>
+        </div>
+
+        <div class="match-popup-body">
+          <table class="match-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>prefixedName</th>
+                <th>vocabulary.prefix</th>
+                <th>uri</th>
+                <th>type</th>
+                <th>score</th>
+              </tr>
+            </thead>
+            <tbody id="matchPopupTableBody">
+              <!-- JS will fill this -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="match-popup-footer">
+          <button class="match-modal-close-btn" onclick="closeMatchPopup()">Close</button>
+        </div>
       </div>
     </div>
 
@@ -141,7 +174,7 @@
           <div class="card">
             <p><strong>Header:</strong> {{ header }}</p>
             <p>Type: {{ header }}  |  Matches: </p>
-            <button class="card-button">Show Matches</button>
+            <button class="card-button" onclick="openCardPopup('{{header}}')">Show Matches</button>
           </div>
         {% endfor %}
       
@@ -161,13 +194,14 @@
         <!-- Buttons to save and convert -->
         <div class="json-buttons">
           <button class="json-button save-button">Save</button>
-          <button class="json-button convert-button">Convert</button>
+          <button class="json-button convert-button" onclick="triggerNQuadsConversion()">Convert</button>
         </div>
       </div>
 
     </section>
 
   </div>
+  
   <script src="{% static 'converter/main.js' %}"></script>
 </body>
 </html>
