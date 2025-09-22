@@ -8,6 +8,7 @@
 </head>
 <body>
     <div class="screen-container">
+        <!-- Main Content Block -->
         <form method="POST" enctype="multipart/form-data" class="form-box">
             {% csrf_token %}
             <h1 class="welcome_title">Welcome to Smart Cow</h1>
@@ -17,11 +18,12 @@
             <label for="csv_file" class="file-button">Select File</label>
             <input type="file" name="csv_file" id="csv_file" accept=".csv" class="file-input">
 
+            <!-- Dynamically Change the label-->
             <div class="file-label">
-                {{ file_name|default:"No File Selected" }}
+                {{ file_name | default:"No File Selected" }}
             </div>
 
-            <button type="submit" class="convert-button">Convert</button>
+            <button type="submit" class="convert-button-start">Convert</button>
         </form>
     </div>
 

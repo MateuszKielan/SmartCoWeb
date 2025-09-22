@@ -9,6 +9,8 @@ fileInput.addEventListener("change", () => {
     //fileInput.form.submit();
 })
 
+
+// DON'T FORGET REMAKE TO OPEN HELPER POPUPS
 // Function to open the popup 
 function openDatasetForm() {
     const popup = document.getElementById('dataset_popup');

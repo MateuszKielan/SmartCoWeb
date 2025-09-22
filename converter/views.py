@@ -21,17 +21,18 @@ def convert_screen_view(request):
     if not csv_path or not os.path.exists(csv_path):
         return render(request, "converter/error.html", {"message": "CSV file not found"})
 
+    # Open and process the csv file
     with open(csv_path, newline='', encoding='utf-8') as f:
         reader = csv.reader(f)
         all_rows = list(reader)
         headers = all_rows[0]
         data_rows = all_rows[1:]
 
-        
+        # full and preview rows for the converter screen      
         full_table = data_rows
         preview_rows = data_rows[:20]
 
-    # Load JSON metadata file
+    # Load JSON metadata file 
     json_path = csv_path.replace('.csv', '-metadata.json')
     if os.path.exists(json_path):
         try:
@@ -43,6 +44,7 @@ def convert_screen_view(request):
     else:
         json_content = "No JSON metadata file found"
 
+    # Return the html page and variables used in layout generation
     return render(request, "converter/convert_screen.html", {
         "headers": headers,
         "rows": preview_rows,
@@ -61,6 +63,7 @@ def welcome_view(request):
     file_name = None
     metadata_file_path = None
 
+    # Receive the file from the cache
     if request.method == 'POST':
         uploaded_file = request.FILES.get('csv_file')
 
@@ -90,6 +93,7 @@ def welcome_view(request):
             # Initialize the engine
             engine = Engine(headers)
 
+            # Compute necessary scores + retrieve the matches from recommender engine
             sorted_vocabs, best_match_index, vocab_coverage_score, all_matches = engine.run_lov_requests()
 
             # Debugging code
@@ -104,7 +108,7 @@ def welcome_view(request):
 
             logger.info(f"Best match for personID: {all_matches['personID'][0]}")
 
-            #logger.info
+            # Overwrite the template metadata file with new matches
             update_metadata(metadata_file_path, headers, all_matches, best_match_index, 'Homogenous', '')
 
             request.session['csv_path'] = csv_path

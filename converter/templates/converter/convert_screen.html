@@ -9,7 +9,7 @@
 <body>
   <div class="converter-container">
     
-    <!-- Full Dataset Popup-->
+    <!-- Full Dataset Popup Window-->
     <div class="popup" id="dataset_popup">
       <div class="dataset_content">
         <div class="popup-header">
@@ -36,12 +36,15 @@
         <button class="close-button" onclick="closeDatasetForm()">Close</button>
       </div>
     </div>
+    <!-- End Of Full Datase Popup Window-->
 
+    <!-- MAIN CONTENT DIVIDED IN 3 SECTIONS-->
 
     <!-- LEFT: CSV Preview -->
     <section class="panel panel-left">
       <h2 class="panel-title">CSV Preview</h2>
       
+      <!-- Dynamically initialize the csv table preview -->
       <table class="csv-table">
         <thead>
           <tr>
@@ -61,20 +64,24 @@
         </tbody>
       </table>
     
-
       <button type="button" class="load-button" onclick="openDatasetForm()">Load Full Dataset</button>
   
     </section>
 
     <!-- MIDDLE: Vocabulary Recommender -->
     <section class="panel panel-middle">
+
       <h2 class="panel-title">Vocabulary Recommender</h2>
+
+      <!-- Upper subtitle with the helper button -->
       <hr class="solid-separator">
       <div class="request-type-separator">
         <p class="sub-title">Choose Request type</p>
         <button class="helper-button">?</button>
       </div>
       <hr class="solid-separator">
+
+      <!-- Request type section -->
       <div class="request-type-container">
         <button class="request-type-button">Homogenous</button>
         <button class="request-type-button">Single</button>
@@ -82,6 +89,8 @@
       <div class="replace-all-container">
         <button class="replace-all-button">Replace All</button>
       </div>
+
+      <!-- Bottom subtitle with the helper button -->
       <hr class="solid-separator">
       <div class="request-type-separator">
         <p class="sub-title">Vocabulary Recommender Results</p>
@@ -89,16 +98,17 @@
       </div>
       <hr class="solid-separator">
 
+      <!-- Card Section -->
       <div class="card-container">
 
-        <!-- VOCABULARY SCORES CARD -->
+        <!-- Vocabulary Scores Card -->
         <div class="card">
           <h4><strong>Vocabulary Scores</strong></h4>
           <p>Vocabularies: </p>
           <button class="card-button">Show Scores</button>
         </div>
       
-        <!-- HEADER CARDS -->
+        <!-- Header Cards -->
         {% for header in headers %}
           <div class="card">
             <p><strong>Header:</strong> {{ header }}</p>
@@ -113,14 +123,20 @@
 
     <!-- RIGHT: JSON Preview -->
     <section class="panel panel-right">
+
       <h2 class="panel-title">JSON Preview</h2>
+
+      <!-- JSON text editing area -->
       <div class="json-preview-container">
         <textarea class="json-textarea" id="jsonPreview" placeholder="JSON content will appear here...">{{ json_content }}</textarea>
+
+        <!-- Buttons to save and convert -->
         <div class="json-buttons">
           <button class="json-button save-button">Save</button>
           <button class="json-button convert-button">Convert</button>
         </div>
       </div>
+
     </section>
 
   </div>

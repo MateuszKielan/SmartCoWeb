@@ -59,27 +59,27 @@
                 "propertyUrl": "http://purl.org/healthcarevocab/v1#PersonIdentificationCodeSequence",
                 "vocab": "dicom",
                 "type": "property",
-                "score": 0.381451
+                "score": 0.3950779
             },
             {
                 "name": "surname",
                 "datatype": "string",
-                "@id": "http://semanticscience.org/resource/SIO_000181",
-                "prefixedName": "sio:SIO_000181",
-                "propertyUrl": "http://semanticscience.org/resource/SIO_000181",
-                "vocab": "sio",
-                "type": "class",
-                "score": 0.05428021
+                "@id": "http://d-nb.info/standards/elementset/gnd#surname",
+                "prefixedName": "gndo:surname",
+                "propertyUrl": "http://d-nb.info/standards/elementset/gnd#surname",
+                "vocab": "gndo",
+                "type": "property",
+                "score": 0.8088862
             },
             {
                 "name": "male",
                 "datatype": "string",
-                "@id": "http://purl.obolibrary.org/obo/PATO_0000384",
-                "prefixedName": "obo:PATO_0000384",
-                "propertyUrl": "http://purl.obolibrary.org/obo/PATO_0000384",
-                "vocab": "obo",
-                "type": "class",
-                "score": 2.7998621
+                "@id": "http://xmlns.com/foaf/0.1/gender",
+                "prefixedName": "foaf:gender",
+                "propertyUrl": "http://xmlns.com/foaf/0.1/gender",
+                "vocab": "foaf",
+                "type": "property",
+                "score": 0.49662608
             },
             {
                 "name": "occupation",
@@ -89,7 +89,7 @@
                 "propertyUrl": "http://d-nb.info/standards/elementset/gnd#professionOrOccupation",
                 "vocab": "gndo",
                 "type": "property",
-                "score": 0.655278
+                "score": 0.6510465
             }
         ]
     },
