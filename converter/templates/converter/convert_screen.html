@@ -38,6 +38,34 @@
     </div>
     <!-- End Of Full Datase Popup Window-->
 
+    <!-- HELPER POPUPS-->
+    <div class="helper-popup" id="request-type-helper"> 
+      <div class="helper-popup-content">
+        <div class="helper-popup-header">
+          <h2 class="helper-popup-title" id="helper_title">Request Type</h2>
+        </div>
+        <div class="helper-popup-body" id="helper_body">
+          <p><strong>Single:</strong> Returns the best vocabulary suggestion for each column independently.</p>
+          <p><strong>Homogenous:</strong> Finds a single vocabulary that works well for all columns together.</p>
+        </div>
+        <button class="close-button" onclick="closeHelperPopup('request-type-helper')">Close</button>
+      </div>
+    </div>
+
+    <div class="helper-popup" id="vocabulary-recommender-helper"> 
+      <div class="helper-popup-content">
+        <div class="helper-popup-header">
+          <h2 class="helper-popup-title">Vocabulary Recommendations</h2>
+        </div>
+        <div class="helper-popup-body">
+          <p>Each card represents a column from your uploaded CSV file. It shows the column name, its detected data type, and how many unique values it contains. Use the 'Show Matches' button to view vocabulary suggestions tailored for that specific column.</p>
+        </div>
+        <button class="close-button" onclick="closeHelperPopup('vocabulary-recommender-helper')">Close</button>
+      </div>
+    </div>
+
+
+
     <!-- MAIN CONTENT DIVIDED IN 3 SECTIONS-->
 
     <!-- LEFT: CSV Preview -->
@@ -77,7 +105,7 @@
       <hr class="solid-separator">
       <div class="request-type-separator">
         <p class="sub-title">Choose Request type</p>
-        <button class="helper-button">?</button>
+        <button class="helper-button" onclick="openHelperPopup('request-type-helper')">?</button>
       </div>
       <hr class="solid-separator">
 
@@ -94,7 +122,7 @@
       <hr class="solid-separator">
       <div class="request-type-separator">
         <p class="sub-title">Vocabulary Recommender Results</p>
-        <button class="helper-button">?</button>
+        <button class="helper-button" onclick="openHelperPopup('vocabulary-recommender-helper')">?</button>
       </div>
       <hr class="solid-separator">
 

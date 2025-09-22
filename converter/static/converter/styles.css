@@ -403,3 +403,43 @@ body, html {
   top: 0;
   left: 0;
 }
+
+/* Helper popup overlay with blur */
+.helper-popup {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  display: none;
+}
+
+.helper-popup-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(520px, 90vw);
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  padding: 20px;
+}
+
+.helper-popup-header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.helper-popup-title {
+  margin: 0;
+}
+
+.helper-popup-body p {
+  margin: 10px 0;
+  color: #333;
+  line-height: 1.4;
+}
