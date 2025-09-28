@@ -1,4 +1,4 @@
-/* Reset and center screen */
+/* GENERAL PAGE STYLES*/
 body, html {
     margin: 0;
     padding: 0;
@@ -7,6 +7,10 @@ body, html {
     background-color: white;
 }
 
+
+
+
+/* STARTING SCREEN STYLES */
 .screen-container {
     display: flex;
     justify-content: center;
@@ -14,6 +18,7 @@ body, html {
     height: 100%;
 }
 
+/* */
 .form-box {
     display: flex;
     flex-direction: column;
@@ -77,6 +82,12 @@ body, html {
     font-size: 13px;
 }
 
+
+
+
+
+
+/* CONVERTER SCREEN STYLES */
 /* Layout for 3-part panel */
 .converter-container {
     display: flex;
@@ -98,7 +109,7 @@ body, html {
   }
   
 
-    /* Table styling */
+  /* Table styling */
   .csv-table {
     font-family: Arial, sans-serif;
     border-collapse: collapse;
@@ -263,6 +274,7 @@ body, html {
     height: calc(100vh - 120px);
   }
 
+  /* JSON text area */
   .json-textarea {
     flex: 1;
     width: 100%;
@@ -331,6 +343,11 @@ body, html {
   }
 
 
+
+
+
+
+/* Styles for the popup windows */
 /* Popup table styling */
 .popup .csv-table {
   width: 85%;
@@ -445,82 +462,3 @@ body, html {
 }
 
 
-.match-popup {
-  display: none;
-  position: fixed;
-  z-index: 1000;
-  left: 0; top: 0;
-  width: 100%; height: 100%;
-  background-color: rgba(0,0,0,0.75);
-}
-
-.match-popup-content.table-popup {
-  background-color: #fff;
-  margin: 60px auto;
-  padding: 20px;
-  border-radius: 12px;
-  width: 90%;
-  max-height: 85%;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.match-popup-header {
-  text-align: center;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #eee;
-}
-
-.match-popup-body {
-  overflow-y: auto;
-  flex-grow: 1;
-  margin-top: 15px;
-}
-
-.match-popup-footer {
-  text-align: center;
-  padding-top: 10px;
-  border-top: 1px solid #eee;
-}
-
-/* Button at bottom */
-.match-modal-close-btn {
-  padding: 10px 20px;
-  background-color: #1976D2;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.match-modal-close-btn:hover {
-  background-color: #145ba0;
-}
-
-/* Table */
-.match-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-family: 'Roboto', sans-serif;
-  font-size: 14px;
-}
-
-.match-table thead {
-  background-color: #f5f5f5;
-}
-
-.match-table th, .match-table td {
-  padding: 12px 10px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
-}
-
-.match-table tr:hover {
-  background-color: #f1f1f1;
-}
-
-.match-table td:first-child,
-.match-table th:first-child {
-  width: 30px;
-}
