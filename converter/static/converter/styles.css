@@ -176,7 +176,13 @@ body, html {
     display: flex;
     flex-direction: row;
     gap: 10px;
+    justify-content: center;
   }
+
+  .request-type-form{
+    width: 40%;
+  }
+
 
   .request-type-button {
     margin-top: 60px;
@@ -190,6 +196,13 @@ body, html {
     flex: 1;
     background-color: #2196F3;
     color: #ffff;
+    width: 100%;
+  }
+
+  .request-type-button.active {
+    background-color: #737170;
+    color: white;
+    border-color: #737170;
   }
 
   .replace-all-container {
@@ -210,6 +223,7 @@ body, html {
     background-color: #2196F3;
     color: #ffff;
     flex: 0.5;
+    width: 100%;
   }
 
   /* Card Section */
@@ -460,5 +474,7 @@ body, html {
   color: #333;
   line-height: 1.4;
 }
+
+
 
 

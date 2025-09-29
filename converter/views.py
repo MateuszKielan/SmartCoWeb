@@ -1,4 +1,5 @@
-from email import header
+# DONT FORGET TO SORT THE IMPORTS PLS 
+from turtle import update
 from django.shortcuts import render, redirect
 from django.conf import settings
 import os
@@ -11,6 +12,8 @@ from .engine import Engine
 import csv
 from django.http import JsonResponse
 
+
+# Set up the logger check settings.py for more info
 logger = logging.getLogger(__name__)
 
 
@@ -32,6 +35,44 @@ def convert_to_nquads_view(request):
     return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
 
 
+def replace_all(request):
+    """
+    Represents functionality of "Replace All" button
+    Call the update_metadata function to overwrite the metadata file with best matches
+    """
+    if request.method == "POST":
+        
+        update_metadata(     
+            request.session.get('metadata_file_path', ''), 
+            request.session.get('headers', []),
+            request.session.get('all_matches', {}),
+            request.session.get('best_match_index', 0),
+            request.session.get('request_type', 'Homogenous'),
+            request.session.get('custom_endpoint', '')
+        )
+        
+    return redirect('convert_screen')
+        #return JsonResponse({"status": "success", "message": "The button has been clicked"})
+
+
+def set_request_type(request, request_type):
+    """
+    Function that changes the request type mode in the session based on which button the user pressed.
+    """
+    if request.method == "POST":
+        request.session['request_type'] = request_type
+        logger.info(f"Request mode change detected: {request.session['request_type']}")
+
+    return redirect('convert_screen')
+
+
+
+# -------------------------Converter Screen----------------------------
+# Responsible for the rendering of the page and passing the vocabulary recommender results to HTML forms
+# Loads the full dataset into the HTML table 
+# Loads the converted JSON file and passes it to the HTML template
+# ---------------------------------------------------------------------
+
 def convert_screen_view(request):
     preview_rows = []
     full_table = False
@@ -41,6 +82,7 @@ def convert_screen_view(request):
     csv_path = request.session.get("csv_path")
     if not csv_path or not os.path.exists(csv_path):
         return render(request, "converter/error.html", {"message": "CSV file not found"})
+
 
     # Open and process the csv file
     with open(csv_path, newline='', encoding='utf-8') as f:
@@ -71,8 +113,17 @@ def convert_screen_view(request):
         "rows": preview_rows,
         "full_table": full_table,
         "json_content": json_content,
+        "request_type": request.session.get('request_type')
     })
 
+
+
+# -------------------------Starting Screen---------------------------- 
+# Responsible for rendering the home / start screen of the project
+# Handles the file submission and processing
+# Calls on the vocabulary recommender engine for processing the csv headers
+# After the conversion the welcome_view renders the main converter screen of SmartCow 
+#---------------------------------------------------------------------
 
 def welcome_view(request):
     """
@@ -116,6 +167,8 @@ def welcome_view(request):
 
             # Compute necessary scores + retrieve the matches from recommender engine
             sorted_vocabs, best_match_index, vocab_coverage_score, all_matches = engine.run_lov_requests()
+            
+            logger.info(f'Sorted Vocabs: {sorted_vocabs}')
 
             # Debugging code
             # print("==============================================")
@@ -129,12 +182,21 @@ def welcome_view(request):
 
             logger.info(f"Best match for personID: {all_matches['personID'][0]}")
 
+            # Store vocabulary-recommender related parameters in session for retrieval
+            request.session['request_type'] = 'Homogenous'
+            request.session['metadata_file_path'] = metadata_file_path
+            request.session['headers'] = headers
+            request.session['all_matches'] = all_matches
+            request.session['best_match_index'] = best_match_index
+            request.session['custom_endpoint'] = ""
+            request.session['csv_path'] = csv_path
+
+            logger.info(request.session['request_type'])
+            logger.info(request.session['metadata_file_path'])
+
             # Overwrite the template metadata file with new matches
             update_metadata(metadata_file_path, headers, all_matches, best_match_index, 'Homogenous', '')
 
-            request.session['csv_path'] = csv_path
-
-            # Redirect to converter screen
             return redirect('convert_screen')
 
     return render(request, 'converter/welcome.html', {

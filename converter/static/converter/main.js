@@ -35,6 +35,7 @@ function closeHelperPopup(element) {
     helper.style.display = 'none';
 }
 
+
 function triggerNQuadsConversion() {
     fetch('/convert/nquads/', {
         method: 'POST',

@@ -114,11 +114,25 @@
 
       <!-- Request type section -->
       <div class="request-type-container">
-        <button class="request-type-button">Homogenous</button>
-        <button class="request-type-button">Single</button>
+
+        <!-- Request Type buttons: Form(Button)-->
+        <form method="POST" class='request-type-form' action="{% url 'set_request_type' 'Homogenous' %}">
+          {% csrf_token %}
+          <button class="request-type-button {% if request_type == 'Homogenous' %}active{% endif %}" id="homogenous-button">Homogenous</button>
+        </form>
+        <form method="POST" class="request-type-form"action="{% url 'set_request_type' 'Single' %}">
+          {% csrf_token %}
+          <button class="request-type-button {% if request_type == 'Single' %}active{% endif %}" id="single-button">Single</button>
+        </form>
+
       </div>
       <div class="replace-all-container">
-        <button class="replace-all-button">Replace All</button>
+
+        <form method="POST" class='request-type-form' action="{% url 'replace_all' %}">
+          {% csrf_token %}
+          <button class="replace-all-button">Replace All</button>
+        </form>
+        
       </div>
 
       <!-- Bottom subtitle with the helper button -->
@@ -144,7 +158,7 @@
           <div class="card">
             <p><strong>Header:</strong> {{ header }}</p>
             <p>Type: {{ header }}  |  Matches: </p>
-            <button class="card-button" onclick="openCardPopup('{{header}}')">Show Matches</button>
+            <button class="card-button">Show Matches</button>
           </div>
         {% endfor %}
       
