@@ -16,17 +16,18 @@ def update_metadata(path, headers, all_results, request_results, mode, custom_en
     with open(path, 'r', encoding='utf-8') as json_file:
         data = json.load(json_file)
 
-    # Buld the lookup index
+    # Build the lookup index based on the type of request
     index_lookup = {
         header: (idx if mode == 'Homogenous' else 0)
         for header, idx in request_results
     }
 
-    # Insert the best match
+    # Insertint the best match
     for column in data.get('tableSchema', {}).get('columns', []):
         header = column.get('name')
         if header in all_results and header in index_lookup:
             match = all_results[header][index_lookup[header]]
+
             column.update({
                 'name': header,
                 'prefixedName': match[0][0] if custom_endpoint == "" else match[0],

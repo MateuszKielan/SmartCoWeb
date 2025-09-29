@@ -42,6 +42,8 @@ class Engine:
         avg_scores = get_average_score(self.vocabs, self.all_results)
         self.sorted_vocabularies, self.vocab_coverage_score = calculate_combi_score(self.all_results, avg_scores)
 
+        self.sorted_vocabularies = sorted(self.sorted_vocabularies, key=lambda x: x[1], reverse=True)
+        
         # Get best match index for each header
         self.final_matches = retrieve_combiSQORE_recursion(
             self.all_results,

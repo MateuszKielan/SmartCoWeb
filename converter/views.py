@@ -168,11 +168,10 @@ def welcome_view(request):
             # Compute necessary scores + retrieve the matches from recommender engine
             sorted_vocabs, best_match_index, vocab_coverage_score, all_matches = engine.run_lov_requests()
             
-            logger.info(f'Sorted Vocabs: {sorted_vocabs}')
 
             # Debugging code
             # print("==============================================")
-            # logger.info(f"Vocab combiscore: {sorted_vocabs}")
+            logger.info(f"Vocab combiscore: {sorted_vocabs}")
             # print("==============================================")
             # logger.info(f"Vocab Coverage score: {vocab_coverage_score}")
             # print("==============================================")
