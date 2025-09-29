@@ -67,7 +67,17 @@
     </div>
     
 
-
+    <!-- Resizable match window -->
+    <div class="match-container" id="matchContainer">
+      <div class="match-resizer" id="matchResizer"></div>
+      <div class="match-header" id="matchHeader">
+        <span>Matches</span>
+        <button class="match-close" onclick="closeHelperPopup('matchContainer')">x</button>
+      </div>
+      <div class="match-content">
+        <p>This is the resizable match window.</p>
+      </div>
+    </div>
 
     <!-- MAIN CONTENT DIVIDED IN 3 SECTIONS-->
 
@@ -150,7 +160,7 @@
         <div class="card">
           <h4><strong>Vocabulary Scores</strong></h4>
           <p>Vocabularies: </p>
-          <button class="card-button">Show Scores</button>
+          <button class="card-button" onclick="openHelperPopup('matchContainer')">Show Scores</button>
         </div>
       
         <!-- Header Cards -->

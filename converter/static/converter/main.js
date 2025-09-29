@@ -69,3 +69,28 @@ function getCookie(name) {
     }
     return cookieValue;
 }
+
+const container = document.getElementById('matchContainer');
+const resizer = document.getElementById('matchResizer');
+
+let startY, startHeight, isResizing = false;
+
+resizer.addEventListener('mousedown', e => {
+  isResizing = true;
+  startY = e.clientY;
+  startHeight = container.offsetHeight;
+  document.addEventListener('mousemove', resize);
+  document.addEventListener('mouseup', stopResize);
+});
+
+function resize(e) {
+  if (!isResizing) return;
+  const dy = startY - e.clientY; // drag up = increase height
+  container.style.height = `${startHeight + dy}px`;
+}
+
+function stopResize() {
+  isResizing = false;
+  document.removeEventListener('mousemove', resize);
+  document.removeEventListener('mouseup', stopResize);
+}
