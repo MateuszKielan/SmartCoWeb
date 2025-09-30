@@ -13,7 +13,7 @@ import csv
 from django.http import JsonResponse
 
 
-# Set up the logger check settings.py for more info
+
 logger = logging.getLogger(__name__)
 
 
@@ -66,7 +66,6 @@ def set_request_type(request, request_type):
     return redirect('convert_screen')
 
 
-
 # -------------------------Converter Screen----------------------------
 # Responsible for the rendering of the page and passing the vocabulary recommender results to HTML forms
 # Loads the full dataset into the HTML table 
@@ -113,6 +112,7 @@ def convert_screen_view(request):
         "rows": preview_rows,
         "full_table": full_table,
         "json_content": json_content,
+        "all_matches": request.session.get("all_matches", {}),
         "request_type": request.session.get('request_type')
     })
 

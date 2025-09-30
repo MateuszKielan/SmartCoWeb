@@ -523,3 +523,31 @@ body, html {
   background: #ddd;
 }
 
+.match-table {
+  font-family: Arial, sans-serif;
+  border-collapse: collapse;
+  width: 50%;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.match-table th,
+.match-table td {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+.match-table th {
+  background-color: #f5f5f5;
+  font-weight: bold;
+}
+
+.match-table tr {
+  background-color: white;
+}
+
+.match-table tr:hover {
+  background-color: #A69F9F;
+}

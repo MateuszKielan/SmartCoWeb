@@ -59,37 +59,37 @@
                 "propertyUrl": "http://purl.org/healthcarevocab/v1#PersonIdentificationCodeSequence",
                 "vocab": "dicom",
                 "type": "property",
-                "score": 0.3950779
+                "score": 0.41037428
             },
             {
                 "name": "surname",
                 "datatype": "string",
-                "@id": "http://d-nb.info/standards/elementset/gnd#surname",
-                "prefixedName": "gndo:surname",
-                "propertyUrl": "http://d-nb.info/standards/elementset/gnd#surname",
-                "vocab": "gndo",
-                "type": "property",
-                "score": 0.8088862
+                "@id": "http://dbpedia.org/ontology/Surname",
+                "prefixedName": "dbpedia-owl:Surname",
+                "propertyUrl": "http://dbpedia.org/ontology/Surname",
+                "vocab": "dbpedia-owl",
+                "type": "class",
+                "score": 0.5119357
             },
             {
                 "name": "male",
                 "datatype": "string",
-                "@id": "http://xmlns.com/foaf/0.1/gender",
-                "prefixedName": "foaf:gender",
-                "propertyUrl": "http://xmlns.com/foaf/0.1/gender",
-                "vocab": "foaf",
+                "@id": "http://dbpedia.org/ontology/championInSingleMale",
+                "prefixedName": "dbpedia-owl:championInSingleMale",
+                "propertyUrl": "http://dbpedia.org/ontology/championInSingleMale",
+                "vocab": "dbpedia-owl",
                 "type": "property",
-                "score": 0.49662608
+                "score": 0.20001082
             },
             {
                 "name": "occupation",
                 "datatype": "string",
-                "@id": "http://d-nb.info/standards/elementset/gnd#professionOrOccupation",
-                "prefixedName": "gndo:professionOrOccupation",
-                "propertyUrl": "http://d-nb.info/standards/elementset/gnd#professionOrOccupation",
-                "vocab": "gndo",
+                "@id": "http://dbpedia.org/ontology/occupation",
+                "prefixedName": "dbpedia-owl:occupation",
+                "propertyUrl": "http://dbpedia.org/ontology/occupation",
+                "vocab": "dbpedia-owl",
                 "type": "property",
-                "score": 0.6510465
+                "score": 0.6025885
             }
         ]
     },

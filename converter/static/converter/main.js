@@ -70,6 +70,65 @@ function getCookie(name) {
     return cookieValue;
 }
 
+const cardButtons = document.querySelectorAll('.card-button');
+// This creates a table dynamically when clicked on the corresponding header card 
+cardButtons.forEach(button => {
+        button.addEventListener('click', function() {
+
+        // Retrieve DOM elements
+        const popup = document.getElementById('matchContainer');
+        const title = document.getElementById('match-header-text');
+        const table = document.getElementById('match-table');
+        table.innerHTML = "";
+        const thead = document.createElement('thead');
+        const tbody = document.createElement('tbody');
+        const headerRow = document.createElement('tr');
+        // Retrieve data
+        const allMatches = JSON.parse(document.getElementById('all-matches-data').textContent);
+        const listOfTitles = ['prefixedName', 'vocabualry.prefix', 'uri', 'type', 'score'];
+
+
+        // create the headers of the table 
+        listOfTitles.forEach(title => {
+            const th = document.createElement('th');
+            th.textContent = title;
+            headerRow.appendChild(th);
+        })
+        
+        thead.append(headerRow);
+        table.append(thead)
+
+        allMatches[this.dataset.header].forEach(match => {
+
+            const bodyRow = document.createElement('tr');
+
+            for (let i =0; i<= match.length; i++) {
+
+                const td = document.createElement('td');
+
+                // Strip the array to string
+                if (match[i] instanceof Array) {
+                    td.textContent = match[i][0];
+                } else {
+                    td.textContent = match[i];
+                }
+                bodyRow.appendChild(td);
+            
+            tbody.appendChild(bodyRow);
+
+            }
+        });
+
+        table.appendChild(tbody);
+
+        title.textContent = this.dataset.header
+
+        popup.style.display = 'block';
+
+    });
+});
+
+
 const container = document.getElementById('matchContainer');
 const resizer = document.getElementById('matchResizer');
 
@@ -82,6 +141,7 @@ resizer.addEventListener('mousedown', e => {
   document.addEventListener('mousemove', resize);
   document.addEventListener('mouseup', stopResize);
 });
+
 
 function resize(e) {
   if (!isResizing) return;

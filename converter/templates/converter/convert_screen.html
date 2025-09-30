@@ -67,15 +67,18 @@
     </div>
     
 
+    {{ all_matches|json_script:"all-matches-data" }}
     <!-- Resizable match window -->
     <div class="match-container" id="matchContainer">
       <div class="match-resizer" id="matchResizer"></div>
       <div class="match-header" id="matchHeader">
-        <span>Matches</span>
+        <h2 class="match-header-text" id="match-header-text">Matches</h2>
         <button class="match-close" onclick="closeHelperPopup('matchContainer')">x</button>
       </div>
-      <div class="match-content">
-        <p>Test</p>
+      <div class="match-content" id="match-content">
+        <table class="match-table" id="match-table">
+
+        </table>
       </div>
     </div>
 
@@ -160,7 +163,7 @@
         <div class="card">
           <h4><strong>Vocabulary Scores</strong></h4>
           <p>Vocabularies: </p>
-          <button class="card-button" onclick="openHelperPopup('matchContainer')">Show Scores</button>
+          <button class="card-button" id='card-button' data-header="Vocabularies">Show Scores</button>
         </div>
       
         <!-- Header Cards -->
@@ -168,7 +171,7 @@
           <div class="card">
             <p><strong>Header:</strong> {{ header }}</p>
             <p>Type: {{ header }}  |  Matches: </p>
-            <button class="card-button">Show Matches</button>
+            <button class="card-button" data-header="{{ header }}">Show Matches</button>
           </div>
         {% endfor %}
       
