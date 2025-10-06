@@ -18,6 +18,9 @@ logger = logging.getLogger(__name__)
 
 
 def convert_to_nquads_view(request):
+    """
+    This function converts the JSON metadata file to N-Quads
+    """
     if request.method == "POST":
         csv_path_str = request.session.get('csv_path')
 
@@ -113,7 +116,9 @@ def convert_screen_view(request):
         "full_table": full_table,
         "json_content": json_content,
         "all_matches": request.session.get("all_matches", {}),
-        "request_type": request.session.get('request_type')
+        "request_type": request.session.get('request_type'),
+        "vocab_coverage_score": request.session.get('vocab_coverage_score'),
+        "sorted_vocabs": request.session.get('sorted_vocabs')
     })
 
 
@@ -171,15 +176,14 @@ def welcome_view(request):
 
             # Debugging code
             # print("==============================================")
-            logger.info(f"Vocab combiscore: {sorted_vocabs}")
+            # logger.info(f"Vocab combiscore: {sorted_vocabs}")
             # print("==============================================")
             # logger.info(f"Vocab Coverage score: {vocab_coverage_score}")
             # print("==============================================")
             # logger.info(f"Final Matches: {best_match_index}")
             # print("==============================================")
             # logger.info(f"All matches: {all_matches}")
-
-            logger.info(f"Best match for personID: {all_matches['personID'][0]}")
+           
 
             # Store vocabulary-recommender related parameters in session for retrieval
             request.session['request_type'] = 'Homogenous'
@@ -189,11 +193,13 @@ def welcome_view(request):
             request.session['best_match_index'] = best_match_index
             request.session['custom_endpoint'] = ""
             request.session['csv_path'] = csv_path
+            request.session['vocab_coverage_score'] = vocab_coverage_score
+            request.session['sorted_vocabs'] = sorted_vocabs
 
             logger.info(request.session['request_type'])
             logger.info(request.session['metadata_file_path'])
 
-            # Overwrite the template metadata file with new matches
+            # Overwrite the template metadata file with the best matches
             update_metadata(metadata_file_path, headers, all_matches, best_match_index, 'Homogenous', '')
 
             return redirect('convert_screen')

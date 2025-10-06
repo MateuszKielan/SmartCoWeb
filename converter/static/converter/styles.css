@@ -512,10 +512,14 @@ body, html {
 
 .match-content {
   flex: 1;
-  overflow: auto;
+  flex-direction: row;
+  flex-wrap: nowrap;
   padding: 10px;
 }
 
+
+.best-match-table{
+}
 
 .match-resizer {
   height: 6px;
@@ -526,7 +530,6 @@ body, html {
 .match-table {
   font-family: Arial, sans-serif;
   border-collapse: collapse;
-  width: 50%;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);

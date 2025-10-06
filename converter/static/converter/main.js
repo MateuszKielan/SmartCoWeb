@@ -98,6 +98,7 @@ cardButtons.forEach(button => {
         thead.append(headerRow);
         table.append(thead)
 
+        // Retrieve all matches for the current header
         allMatches[this.dataset.header].forEach(match => {
 
             const bodyRow = document.createElement('tr');
