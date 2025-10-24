@@ -1,4 +1,5 @@
 # DONT FORGET TO SORT THE IMPORTS PLS 
+from re import X
 from turtle import update
 from django.shortcuts import render, redirect
 from django.conf import settings
@@ -118,7 +119,8 @@ def convert_screen_view(request):
         "all_matches": request.session.get("all_matches", {}),
         "request_type": request.session.get('request_type'),
         "vocab_coverage_score": request.session.get('vocab_coverage_score'),
-        "sorted_vocabs": request.session.get('sorted_vocabs')
+        "sorted_vocabs": request.session.get('sorted_vocabs'),
+        "best_match_index": request.session.get('best_match_index')
     })
 
 
@@ -173,7 +175,7 @@ def welcome_view(request):
             # Compute necessary scores + retrieve the matches from recommender engine
             sorted_vocabs, best_match_index, vocab_coverage_score, all_matches = engine.run_lov_requests()
             
-
+            best_match_index = {header:index for header, index in best_match_index}
             # Debugging code
             # print("==============================================")
             # logger.info(f"Vocab combiscore: {sorted_vocabs}")
@@ -184,6 +186,7 @@ def welcome_view(request):
             # print("==============================================")
             # logger.info(f"All matches: {all_matches}")
            
+            vocab_coverage_score = sorted(vocab_coverage_score, key=lambda score: score[1], reverse=True)
 
             # Store vocabulary-recommender related parameters in session for retrieval
             request.session['request_type'] = 'Homogenous'

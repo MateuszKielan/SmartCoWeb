@@ -87,7 +87,6 @@ def convert_json_to_nquads(selected_file):
         converter.convert()
 
         logger.info("CoW: Conversion to N-Quads completed successfully.")
-        show_success_message("Conversion to N-Quads completed successfully.")
         end_time_converter = time.time()
         total_execution_time_converter = end_time_converter - start_time_converter
         logger.info(f"Total execution time of conversion: {total_execution_time_converter} seconds")

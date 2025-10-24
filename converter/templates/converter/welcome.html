@@ -7,6 +7,15 @@
     <link rel="stylesheet" href="{% static 'converter/styles.css' %}">
 </head>
 <body>
+    <!-- Loader screen that is triggered after convert button press -->
+    <div class="loader_page" id="loader_page">
+        <div class="header-loader">
+            Loading
+        </div>
+        <span class="spinner"></span>
+    </div>
+
+
     <div class="screen-container">
         <!-- Main Content Block -->
         <form method="POST" enctype="multipart/form-data" class="form-box">
@@ -23,7 +32,7 @@
                 {{ file_name | default:"No File Selected" }}
             </div>
 
-            <button type="submit" class="convert-button-start">Convert</button>
+            <button type="submit" class="convert-button-start" id="convert-button-start">Convert</button>
         </form>
     </div>
 

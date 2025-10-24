@@ -70,6 +70,8 @@
     {{ all_matches|json_script:"all-matches-data" }}
     {{ vocab_coverage_score|json_script:"vocab-coverage-score-data" }}
     {{ sorted_vocabs|json_script:"sorted-vocabs-data" }}
+    {{ best_match_index|json_script:"best-match-index-data"}}
+    
     <!-- Resizable match window -->
     <div class="match-container" id="matchContainer">
       <div class="match-resizer" id="matchResizer"></div>
@@ -79,9 +81,12 @@
       </div>
       <div class="match-content" id="match-content">
         <div class="best-match-table" id="best-match-table">
-          <h2> Best match</h2>
+          <h2> Best Match</h2>
         </div>
-        <table class="match-table" id="match-table"></table>
+        <div class="all-match-table">
+          <h2> All Matches</h2>
+          <table class="match-table" id="match-table"></table>
+        </div>
       </div>
     </div>
 

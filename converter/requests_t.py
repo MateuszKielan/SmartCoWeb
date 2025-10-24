@@ -224,6 +224,8 @@ def calculate_combi_score(all_results: dict, vocab_scores: list[tuple]) -> list[
     vocab_coverage_score = []
     new_vocab_scores = []
 
+    vocab_data = {}
+
     for vocab in vocab_scores:
         
         vocab_name = vocab[0]
@@ -239,7 +241,7 @@ def calculate_combi_score(all_results: dict, vocab_scores: list[tuple]) -> list[
 
         vocab_coverage_score.append((vocab[0], vocab_query_coverage))
         vocab_combi_score = vocab_similarity_score * vocab_query_coverage
-
+    
         new_vocab_scores.append((vocab_name, vocab_combi_score))
 
     new_vocab_scores = normalize_scores(new_vocab_scores)

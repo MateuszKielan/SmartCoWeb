@@ -19,7 +19,7 @@ def update_metadata(path, headers, all_results, request_results, mode, custom_en
     # Build the lookup index based on the type of request
     index_lookup = {
         header: (idx if mode == 'Homogenous' else 0)
-        for header, idx in request_results
+        for header, idx in request_results.items()
     }
 
     # Insertint the best match

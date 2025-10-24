@@ -79,13 +79,39 @@ cardButtons.forEach(button => {
         const popup = document.getElementById('matchContainer');
         const title = document.getElementById('match-header-text');
         const table = document.getElementById('match-table');
-        table.innerHTML = "";
+        const bestMatchTable = document.getElementById('best-match-table');
+
+        // Create the table headers 
         const thead = document.createElement('thead');
         const tbody = document.createElement('tbody');
         const headerRow = document.createElement('tr');
+        
+        // Create the best match table headers
+        const tBestHead = document.createElement('thead');
+        const tBestBody = document.createElement('body');
+        const headerBestRow = document.createElement('tr');
+
+
         // Retrieve data
         const allMatches = JSON.parse(document.getElementById('all-matches-data').textContent);
+        const bestMatchIndex = JSON.parse(document.getElementById('best-match-index-data').textContent);
+        const vocabCoverageScore = JSON.parse(document.getElementById('vocab-coverage-score-data').textContent);
+        const sortedVocabs = JSON.parse(document.getElementById('sorted-vocabs-data').textContent);
         const listOfTitles = ['prefixedName', 'vocabualry.prefix', 'uri', 'type', 'score'];
+
+        console.log(bestMatchIndex[this.dataset.header]);
+        
+        // Reset the table 
+        table.innerHTML = "";
+
+        // If the first vocab card was pressed
+        if (this.dataset.header == "Vocabularies") {
+            console.log(vocabCoverageScore);
+            console.log(sortedVocabs)
+        }
+
+
+
 
 
         // create the headers of the table 
@@ -93,10 +119,15 @@ cardButtons.forEach(button => {
             const th = document.createElement('th');
             th.textContent = title;
             headerRow.appendChild(th);
+            headerBestRow.appendChild(th);
         })
         
         thead.append(headerRow);
-        table.append(thead)
+        tBestHead.append(headerBestRow);
+
+        table.append(thead);
+        bestMatchTable.append(tBestHead);
+
 
         // Retrieve all matches for the current header
         allMatches[this.dataset.header].forEach(match => {
@@ -129,19 +160,32 @@ cardButtons.forEach(button => {
     });
 });
 
+const convert_btn  = document.getElementById("convert-button-start");
+const loader = document.getElementById("loader_page");
+
+if (convert_btn && loader){
+    convert_btn.addEventListener('click', e => {
+        console.log('registered button click');
+        loader.style.display = 'flex';    
+    });
+}
+
+
 
 const container = document.getElementById('matchContainer');
 const resizer = document.getElementById('matchResizer');
 
 let startY, startHeight, isResizing = false;
 
-resizer.addEventListener('mousedown', e => {
-  isResizing = true;
-  startY = e.clientY;
-  startHeight = container.offsetHeight;
-  document.addEventListener('mousemove', resize);
-  document.addEventListener('mouseup', stopResize);
-});
+if (resizer) {
+    resizer.addEventListener('mousedown', e => {
+    isResizing = true;
+    startY = e.clientY;
+    startHeight = container.offsetHeight;
+    document.addEventListener('mousemove', resize);
+    document.addEventListener('mouseup', stopResize);
+    });
+}
 
 
 function resize(e) {
