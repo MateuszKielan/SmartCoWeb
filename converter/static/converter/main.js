@@ -74,12 +74,13 @@ const cardButtons = document.querySelectorAll('.card-button');
 // This creates a table dynamically when clicked on the corresponding header card 
 cardButtons.forEach(button => {
         button.addEventListener('click', function() {
-
+        
         // Retrieve DOM elements
         const popup = document.getElementById('matchContainer');
         const title = document.getElementById('match-header-text');
         const table = document.getElementById('match-table');
-        const bestMatchTable = document.getElementById('best-match-table');
+        const bestMatchTable = document.getElementById('best-match-table-element');
+        
 
         // Create the table headers 
         const thead = document.createElement('thead');
@@ -88,56 +89,70 @@ cardButtons.forEach(button => {
         
         // Create the best match table headers
         const tBestHead = document.createElement('thead');
-        const tBestBody = document.createElement('body');
+        const tBestBody = document.createElement('tbody');
         const headerBestRow = document.createElement('tr');
 
 
         // Retrieve data
         const allMatches = JSON.parse(document.getElementById('all-matches-data').textContent);
-        const bestMatchIndex = JSON.parse(document.getElementById('best-match-index-data').textContent);
+        const bestMatchIndexes = JSON.parse(document.getElementById('best-match-index-data').textContent);
         const vocabCoverageScore = JSON.parse(document.getElementById('vocab-coverage-score-data').textContent);
         const sortedVocabs = JSON.parse(document.getElementById('sorted-vocabs-data').textContent);
         const listOfTitles = ['prefixedName', 'vocabualry.prefix', 'uri', 'type', 'score'];
+        const header = this.dataset.header;
 
-        console.log(bestMatchIndex[this.dataset.header]);
-        
-        // Reset the table 
         table.innerHTML = "";
+        bestMatchTable.innerHTML = "";
 
         // If the first vocab card was pressed
-        if (this.dataset.header == "Vocabularies") {
+        if (header == "Vocabularies") {
             console.log(vocabCoverageScore);
             console.log(sortedVocabs)
         }
 
 
-
-
-
         // create the headers of the table 
         listOfTitles.forEach(title => {
             const th = document.createElement('th');
+            const th2 = document.createElement('th');
+
             th.textContent = title;
+            th2.textContent = title;
+
             headerRow.appendChild(th);
-            headerBestRow.appendChild(th);
+            headerBestRow.appendChild(th2);
         })
         
         thead.append(headerRow);
-        tBestHead.append(headerBestRow);
-
         table.append(thead);
+        
+        tBestHead.append(headerBestRow);
         bestMatchTable.append(tBestHead);
 
+        // Populate the best match table 
+        const bestBodyRow = document.createElement('tr');
+        const bestMatchElement = allMatches[header][bestMatchIndexes[header]];
 
-        // Retrieve all matches for the current header
-        allMatches[this.dataset.header].forEach(match => {
+        for (let j =0; j < allMatches[header][0].length; j++) {
+            const bestTd = document.createElement('td');
 
-            const bodyRow = document.createElement('tr');
+            if (bestMatchElement[j] instanceof Array) {
+                bestTd.textContent = bestMatchElement[j][0];
+            } else {
+                bestTd.textContent = bestMatchElement[j];
+            }
+            bestBodyRow.appendChild(bestTd);
+        }
+        tBestBody.appendChild(bestBodyRow);
+        bestMatchTable.appendChild(tBestBody);
 
-            for (let i =0; i<= match.length; i++) {
+        // Populate all match table
+        allMatches[header].forEach(match => {
 
+            const bodyRow = document.createElement('tr');   
+
+            for (let i =0; i < match.length; i++) {
                 const td = document.createElement('td');
-
                 // Strip the array to string
                 if (match[i] instanceof Array) {
                     td.textContent = match[i][0];
@@ -145,10 +160,9 @@ cardButtons.forEach(button => {
                     td.textContent = match[i];
                 }
                 bodyRow.appendChild(td);
-            
+            }
             tbody.appendChild(bodyRow);
 
-            }
         });
 
         table.appendChild(tbody);
@@ -159,6 +173,8 @@ cardButtons.forEach(button => {
 
     });
 });
+
+
 
 const convert_btn  = document.getElementById("convert-button-start");
 const loader = document.getElementById("loader_page");

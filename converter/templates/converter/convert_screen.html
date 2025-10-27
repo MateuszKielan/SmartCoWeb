@@ -71,7 +71,7 @@
     {{ vocab_coverage_score|json_script:"vocab-coverage-score-data" }}
     {{ sorted_vocabs|json_script:"sorted-vocabs-data" }}
     {{ best_match_index|json_script:"best-match-index-data"}}
-    
+
     <!-- Resizable match window -->
     <div class="match-container" id="matchContainer">
       <div class="match-resizer" id="matchResizer"></div>
@@ -81,10 +81,11 @@
       </div>
       <div class="match-content" id="match-content">
         <div class="best-match-table" id="best-match-table">
-          <h2> Best Match</h2>
+          <h2 class="he1"> Best Match</h2>
+          <table class="match-table" id="best-match-table-element"></table>
         </div>
         <div class="all-match-table">
-          <h2> All Matches</h2>
+          <h2 class="he1"> All Matches</h2>
           <table class="match-table" id="match-table"></table>
         </div>
       </div>
@@ -163,6 +164,11 @@
         <button class="helper-button" onclick="openHelperPopup('vocabulary-recommender-helper')">?</button>
       </div>
       <hr class="solid-separator">
+
+      <div class="search-block">
+        <input type="text" class="header-search" id="header-search" placeholder="Enter header name">
+        <button class="search-button" id="search-button">Show Matches</button>
+      </div>
 
       <!-- Card Section -->
       <div class="card-container">
