@@ -71,7 +71,7 @@
     {{ vocab_coverage_score|json_script:"vocab-coverage-score-data" }}
     {{ sorted_vocabs|json_script:"sorted-vocabs-data" }}
     {{ best_match_index|json_script:"best-match-index-data"}}
-
+    {{ headers|json_script:"headers"}}
     <!-- Resizable match window -->
     <div class="match-container" id="matchContainer">
       <div class="match-resizer" id="matchResizer"></div>

@@ -310,6 +310,7 @@ body, html {
     height: 3vh;  /* Already 3vh, keeps button same height */
     border-radius: 4px;
     cursor: pointer;
+    outline: none;
     font-size: 14px;
     font-weight: 500;
     transition: background-color 0.2s;
