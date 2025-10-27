@@ -81,6 +81,9 @@ matchTables.forEach(table => {
             const insertPopup = document.getElementById('insert-popup');
             insertPopup.style.display = 'flex';
         }
+
+        console.log(e.target.textContent);
+
     });
 });
 
