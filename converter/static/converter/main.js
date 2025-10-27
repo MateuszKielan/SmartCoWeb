@@ -70,6 +70,19 @@ function getCookie(name) {
     return cookieValue;
 }
 
+const matchTables = document.querySelectorAll('.match-table');
+
+matchTables.forEach(table => {
+    table.addEventListener('click', function(e) {
+
+        // Only handle clicks on table cells
+        // When row is clicked open a popup with the further action choice
+        if (e.target.tagName === 'TD') {
+            const insertPopup = document.getElementById('insert-popup');
+            insertPopup.style.display = 'flex';
+        }
+    });
+});
 
 function create_match_tables(header) {
     const headers = JSON.parse(document.getElementById('headers').textContent);
