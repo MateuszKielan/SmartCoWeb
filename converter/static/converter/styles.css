@@ -292,12 +292,14 @@ body, html {
     align-items: center;
     width: 85%;
     gap: 10px;
+    margin: 0 auto 20px auto;  /* Add this line to center the block */
   }
 
   .header-search {
-    height: 2vh;
+    height: 3vh;  /* Changed from 2vh to 3vh to match button */
     border-radius: 3px;
     outline: none;
+    width: 80%;
   } 
   .header-search:focus {
     border-color: #2196F3;
@@ -305,6 +307,14 @@ body, html {
 
   .search-button{
     width: 20%;
+    height: 3vh;  /* Already 3vh, keeps button same height */
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    background-color: #2196F3;
+    color: #ffff;
   }
 
 
