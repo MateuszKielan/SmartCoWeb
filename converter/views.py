@@ -18,6 +18,8 @@ from django.http import JsonResponse
 logger = logging.getLogger(__name__)
 
 
+
+
 def convert_to_nquads_view(request):
     """
     This function converts the JSON metadata file to N-Quads
@@ -176,15 +178,6 @@ def welcome_view(request):
             sorted_vocabs, best_match_index, vocab_coverage_score, all_matches = engine.run_lov_requests()
             
             best_match_index = {header:index for header, index in best_match_index}
-            # Debugging code
-            # print("==============================================")
-            # logger.info(f"Vocab combiscore: {sorted_vocabs}")
-            # print("==============================================")
-            # logger.info(f"Vocab Coverage score: {vocab_coverage_score}")
-            # print("==============================================")
-            # logger.info(f"Final Matches: {best_match_index}")
-            # print("==============================================")
-            # logger.info(f"All matches: {all_matches}")
            
             vocab_coverage_score = sorted(vocab_coverage_score, key=lambda score: score[1], reverse=True)
 
@@ -212,3 +205,29 @@ def welcome_view(request):
         'metadata_generated': bool(metadata_file_path),
         'metadata_path': metadata_file_path,
     })
+
+
+def store_selected_row(request):
+    """
+    Function store_selected_row that 
+    """
+    if request.method == "POST":
+        data = json.loads(request.body)
+        selected_row = data.get('selected_row', [])
+        request.session['selected_row'] = selected_row
+        print(selected_row)
+
+        return JsonResponse({'status': 'ok'})
+    return JsonResponse({"error": 'Invalid request'}, status=400)
+
+
+def insert_match(request):
+    """
+    This function inserts the selected match
+    """
+    
+    if request.method == "POST":
+        print(request.session.get('selected_row'))
+
+        return JsonResponse({'status': 'ok'})
+    return JsonResponse({'error': 'INvalid request'}, status=400)

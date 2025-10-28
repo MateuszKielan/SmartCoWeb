@@ -94,7 +94,10 @@
     <div class="insert-popup" id="insert-popup">
       <div class="insert-popup-content">
         <h2>Select Action</h2>
-        <button class="insert-btn" id="insert-btn">Insert</button>
+        <form method="POST" class="request-type-form"action="{% url 'insert_match' %}">
+          {% csrf_token %}
+          <button class="insert-btn" id="insert-btn">Insert</button>
+        </form>
         <button class="cancel-btn" id="cancel-btn" onclick="closeHelperPopup('insert-popup')">Cancel</button>
       </div>
     </div>

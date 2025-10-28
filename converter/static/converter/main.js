@@ -80,9 +80,23 @@ matchTables.forEach(table => {
         if (e.target.tagName === 'TD') {
             const insertPopup = document.getElementById('insert-popup');
             insertPopup.style.display = 'flex';
+
+            const row = e.target.closest('tr'); 
+            // Collect all cell values in this row
+            const rowValues = Array.from(row.querySelectorAll('td')).map(td => td.textContent);
+
+            // Send the request to django so that it can be stored in the session
+            fetch('/store_selected_row/', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ selected_row: rowValues })
+              });
         }
 
-        console.log(e.target.textContent);
+        //console.log(e.target.textContent);
 
     });
 });
