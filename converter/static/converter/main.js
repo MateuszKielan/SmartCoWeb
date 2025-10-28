@@ -84,6 +84,9 @@ matchTables.forEach(table => {
             const row = e.target.closest('tr'); 
             // Collect all cell values in this row
             const rowValues = Array.from(row.querySelectorAll('td')).map(td => td.textContent);
+            const currentHeader = document.getElementById('match-header-text').textContent;
+
+            console.log(currentHeader)
 
             // Send the request to django so that it can be stored in the session
             fetch('/store_selected_row/', {
@@ -92,12 +95,12 @@ matchTables.forEach(table => {
                   'Content-Type': 'application/json',
                   'X-CSRFToken': getCookie('csrftoken')
                 },
-                body: JSON.stringify({ selected_row: rowValues })
+                body: JSON.stringify({ 
+                    selected_row: rowValues,
+                    current_header: currentHeader
+                 })
               });
         }
-
-        //console.log(e.target.textContent);
-
     });
 });
 

@@ -583,6 +583,7 @@ body, html {
   background: rgba(0,0,0,0.5); 
   backdrop-filter: blur(4px);   
   z-index: 1000;
+  gap: 30px;
 
   justify-content: center;
   align-items: center;
@@ -598,9 +599,15 @@ body, html {
   box-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
+.insert-popup-buttons {
+  display: flex;
+  justify-content: center;  
+  gap: 10px;                 
+  margin-top: 15px;
+}
+
 .cancel-btn {
-  margin: 20px auto;
-  padding: 10px 20px;
+  padding: 8px 16px;
   background-color: rgb(243, 5, 5);
   color: white;
   border: none;
@@ -612,10 +619,13 @@ body, html {
   background-color: #a31603;
 }
 
+.request-match-form {
+  margin: 0;
+  padding: 0;
+}
 .insert-btn {
-  margin: 20px auto;
-  padding: 10px 20px;
-  background-color: #3dee07;
+  padding: 8px 16px;
+  background-color: #38d308;
   color: white;
   border: none;
   border-radius: 4px;

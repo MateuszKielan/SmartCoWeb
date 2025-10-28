@@ -6,7 +6,7 @@ from django.conf import settings
 import os
 import json
 from .utils import convert_with_cow, get_csv_headers, convert_json_to_nquads 
-from .metadata import update_metadata
+from .metadata import update_metadata, insert_instance
 from pathlib import Path
 import logging
 from .engine import Engine
@@ -213,9 +213,12 @@ def store_selected_row(request):
     """
     if request.method == "POST":
         data = json.loads(request.body)
+
         selected_row = data.get('selected_row', [])
+        current_header = data.get('current_header', [])
+
         request.session['selected_row'] = selected_row
-        print(selected_row)
+        request.session['current_header'] = current_header
 
         return JsonResponse({'status': 'ok'})
     return JsonResponse({"error": 'Invalid request'}, status=400)
@@ -227,7 +230,15 @@ def insert_match(request):
     """
     
     if request.method == "POST":
-        print(request.session.get('selected_row'))
 
-        return JsonResponse({'status': 'ok'})
-    return JsonResponse({'error': 'INvalid request'}, status=400)
+        # Retrieve required data from the session
+        metadata_path = request.session.get('metadata_file_path', '')
+        row_data = request.session.get('selected_row', [])
+        header = request.session.get('current_header', '')
+
+        # Insert the match into metadata 
+        insert_instance(metadata_path, row_data, header)
+
+        return redirect('convert_screen')
+    return JsonResponse({"error": 'Invalid request'}, status=400)
+        
