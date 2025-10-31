@@ -74,7 +74,7 @@
     {{ headers|json_script:"headers"}}
     <!-- Resizable match window -->
     <div class="match-container" id="matchContainer">
-      <div class="match-resizer" id="matchResizer"></div>
+      <div class="match-resizer" id="matchResizer">...</div>
       <div class="match-header" id="matchHeader">
         <h2 class="match-header-text" id="match-header-text">Matches</h2>
         <button class="match-close" onclick="closeHelperPopup('matchContainer')">x</button>
@@ -216,7 +216,10 @@
 
         <!-- Buttons to save and convert -->
         <div class="json-buttons">
-          <button class="json-button save-button">Save</button>
+          <form method="POST" class='save-file-form' action="{% url 'save_file' %}">
+            {% csrf_token %}
+            <button class="json-button save-button">Save</button>
+          </form>
           <button class="json-button convert-button" onclick="triggerNQuadsConversion()">Convert</button>
         </div>
       </div>

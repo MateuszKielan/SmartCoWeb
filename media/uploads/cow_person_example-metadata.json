@@ -64,12 +64,12 @@
             {
                 "name": "surname",
                 "datatype": "string",
-                "@id": "http://d-nb.info/standards/elementset/gnd#surname",
-                "prefixedName": "gndo:surname",
-                "propertyUrl": "http://d-nb.info/standards/elementset/gnd#surname",
-                "vocab": "gndo",
-                "type": "property",
-                "score": 0.82266986
+                "@id": "http://dbpedia.org/ontology/Surname",
+                "prefixedName": "dbpedia-owl:Surname",
+                "propertyUrl": "http://dbpedia.org/ontology/Surname",
+                "vocab": "dbpedia-owl",
+                "type": "class",
+                "score": 0.5122891
             },
             {
                 "name": "male",

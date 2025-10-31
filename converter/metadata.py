@@ -81,7 +81,7 @@ def insert_instance(path, row, header):
                 'prefixedName': name,     # prefixed name 
                 '@id': uri,               # uri
                 'vocab': vocab,           # vocabulary 
-                'propertyUrl': uri,        # uri
+                'propertyUrl': uri,       # uri
                 'type': rdf_type,         # rdf type
                 'score': score            # score
             })

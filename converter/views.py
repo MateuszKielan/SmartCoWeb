@@ -242,3 +242,11 @@ def insert_match(request):
         return redirect('convert_screen')
     return JsonResponse({"error": 'Invalid request'}, status=400)
         
+def save_file(request):
+    """
+    This function saves the file 
+    """
+
+    if request.method == "POST":
+        
+        return redirect('converter_screen')

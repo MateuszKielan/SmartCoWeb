@@ -408,6 +408,15 @@ body, html {
     margin-top: 15px;
     justify-content: center;
   }
+  .json-buttons > * {
+    flex: 0 0 50%;
+  }
+
+  .save-file-form {
+    margin: 0;
+    padding: 0;
+    display: flex;
+  }
 
   .json-button {
     padding: 10px 20px;
@@ -665,9 +674,15 @@ body, html {
 
 .match-close {
   background: none;
-  border: none;
+  border: 2px solid;
   font-size: 18px;
   cursor: pointer;
+}
+
+.match-close:hover {
+  background-color: #1e1e1e;
+  color: #ffff;
+  transition: 0.3s;
 }
 
 .he1 {
@@ -684,7 +699,10 @@ body, html {
 }
 
 .match-resizer {
-  height: 6px;
+  height: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   cursor: ns-resize;
   background: #ddd;
 }
