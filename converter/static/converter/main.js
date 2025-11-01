@@ -8,6 +8,33 @@ if (fileInput && fileLabelElement) {
     })
 }
 
+function toggleSideBar(){
+    const navigationSideBar = document.getElementById('navigation-side-bar');
+    const overlay = document.getElementById('main-overlay');
+
+    navigationSideBar.classList.toggle('active');
+    overlay.classList.toggle('active');
+}
+
+const toggleMenuButton = document.getElementById('hamburger');
+
+toggleMenuButton.addEventListener('click', () => {
+    toggleSideBar()
+})
+
+
+window.addEventListener('click', (e) => {
+    const navigationSideBar = document.getElementById('navigation-side-bar');
+    const overlay = document.getElementById('main-overlay');
+    
+    // If sidebar is open and click is outside sidebar
+    if (navigationSideBar.classList.contains('active') && 
+        !navigationSideBar.contains(e.target) && 
+        e.target !== hamburger) {
+        navigationSideBar.classList.remove('active');
+        overlay.classList.remove('active');
+    }
+});
 
 // DON'T FORGET REMAKE TO OPEN HELPER POPUPS
 // Function to open the popup 
@@ -104,6 +131,11 @@ matchTables.forEach(table => {
     });
 });
 
+function create_vocabulary_table(sortedVocabs, vocabCoverageScore) {
+    const listOfTitles = ['Vocabulary']
+}
+
+
 function create_match_tables(header) {
     const headers = JSON.parse(document.getElementById('headers').textContent);
 
@@ -140,8 +172,11 @@ function create_match_tables(header) {
 
      // If the first vocab card was pressed
      if (header == "Vocabularies") {
+        // HERE CALL THE FUNCTION to build vocabulary table 
         console.log(vocabCoverageScore);
         console.log(sortedVocabs)
+
+        return;
     }
 
 

@@ -3,10 +3,28 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Converter Screen</title>
+  <title>Smart Cow</title>
   <link rel="stylesheet" href="{% static 'converter/styles.css' %}">
+  <link rel="icon" href="{% static 'converter/cow.ico' %}" type="image/x-icon">
 </head>
 <body>
+  <!-- Header Bar -->
+  <div class="header">
+      <button class="hamburger" id="hamburger">
+          <span></span>
+          <span></span>
+          <span></span>
+      </button>
+      <div class="app-title">Hello Hello Hello</div>
+  </div>
+
+  <!-- Navigation Bar -->
+  <div class="navigation-side-bar" id="navigation-side-bar">
+
+  </div>
+
+  <div class="main-overlay", id="main-overlay"></div>
+
   <div class="converter-container">
     
     <!-- Full Dataset Popup Window-->
@@ -199,7 +217,11 @@
         {% for header in headers %}
           <div class="card">
             <p><strong>Header:</strong> {{ header }}</p>
-            <p>Type: {{ header }}  |  Matches: </p>
+            {% for key, value in matches_count.items %}
+              {% if key == header %}
+                <p>Type: {{ header }}  |  Matches: {{ value }} </p>
+              {% endif %}
+            {% endfor %}
             <button class="card-button" data-header="{{ header }}">Show Matches</button>
           </div>
         {% endfor %}

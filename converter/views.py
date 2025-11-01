@@ -98,6 +98,10 @@ def convert_screen_view(request):
         full_table = data_rows
         preview_rows = data_rows[:20]
 
+    # Retrieve num of matches for each header
+    all_matches = request.session.get('all_matches', {})
+    matches_count = {header: len(all_matches[header]) for header in all_matches }
+
     # Load JSON metadata file 
     json_path = csv_path.replace('.csv', '-metadata.json')
     if os.path.exists(json_path):
@@ -120,7 +124,8 @@ def convert_screen_view(request):
         "request_type": request.session.get('request_type'),
         "vocab_coverage_score": request.session.get('vocab_coverage_score'),
         "sorted_vocabs": request.session.get('sorted_vocabs'),
-        "best_match_index": request.session.get('best_match_index')
+        "best_match_index": request.session.get('best_match_index'),
+        "matches_count": matches_count
     })
 
 
