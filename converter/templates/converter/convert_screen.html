@@ -72,6 +72,8 @@
     {{ sorted_vocabs|json_script:"sorted-vocabs-data" }}
     {{ best_match_index|json_script:"best-match-index-data"}}
     {{ headers|json_script:"headers"}}
+
+
     <!-- Resizable match window -->
     <div class="match-container" id="matchContainer">
       <div class="match-resizer" id="matchResizer">...</div>
@@ -99,6 +101,7 @@
             {% csrf_token %}
             <button class="insert-btn" id="insert-btn">Insert</button>
           </form>
+          <button class="source-btn" id="source-btn">Source</button>
           <button class="cancel-btn" id="cancel-btn" onclick="closeHelperPopup('insert-popup')">Cancel</button>
         </div>
       </div>
@@ -212,16 +215,19 @@
 
       <!-- JSON text editing area -->
       <div class="json-preview-container">
-        <textarea class="json-textarea" id="jsonPreview" placeholder="JSON content will appear here...">{{ json_content }}</textarea>
+        <form method="POST" class='save-file-form' action="{% url 'save_file' %}">
+          {% csrf_token %}
+          
+          <textarea name="json_text" class="json-textarea" id="jsonPreview" placeholder="JSON content will appear here...">{{ json_content }}</textarea>
 
-        <!-- Buttons to save and convert -->
-        <div class="json-buttons">
-          <form method="POST" class='save-file-form' action="{% url 'save_file' %}">
-            {% csrf_token %}
-            <button class="json-button save-button">Save</button>
-          </form>
-          <button class="json-button convert-button" onclick="triggerNQuadsConversion()">Convert</button>
-        </div>
+          <!-- Buttons to save and convert -->
+          <div class="json-buttons">
+              <button class="json-button save-button" type="submit">Save</button>
+            </form>
+            <button class="json-button convert-button" onclick="triggerNQuadsConversion()">Convert</button>
+          </div>
+
+        </form>
       </div>
 
     </section>

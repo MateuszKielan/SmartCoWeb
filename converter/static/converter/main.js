@@ -218,7 +218,6 @@ cardButtons.forEach(button => {
     });
 });
 
-
 const searchButton = document.getElementById('search-button');
 // This create a table dynamically when using the search bar
 searchButton.addEventListener('click', function(){
@@ -226,16 +225,35 @@ searchButton.addEventListener('click', function(){
     create_match_tables(header_search);
 });
 
-const convert_btn  = document.getElementById("convert-button-start");
-const loader = document.getElementById("loader_page");
 
-if (convert_btn && loader){
-    convert_btn.addEventListener('click', e => {
-        console.log('registered button click');
-        loader.style.display = 'flex';    
+const sourceButton = document.getElementById('source-btn');
+
+// MAYBE ADD THIS in a Function when the row was clicked ?
+sourceButton.addEventListener('click', ()=> {
+    // Initialize the new tab here
+    const newTab = window.open('about:blank', '_blank');
+
+    fetch('/store_selected_row/')  // URL of the Django view
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'ok' && data.redirect_link) {
+            console.log(data.redirect_link)
+            newTab.location.href = data.redirect_link 
+        } else {
+            console.error('Redirect link not found');
+        }
     });
-}
+});
 
+
+function loadingScreen() {
+    const convert_btn  = document.getElementById("convert-button-start");
+    const loader = document.getElementById("loader_page");
+
+    if (convert_btn && loader){
+        loader.style.display = 'flex';    
+    }
+}
 
 
 const container = document.getElementById('matchContainer');

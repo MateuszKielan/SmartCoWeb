@@ -18,10 +18,8 @@ from django.http import JsonResponse
 logger = logging.getLogger(__name__)
 
 
-
-
 def convert_to_nquads_view(request):
-    """
+    """a
     This function converts the JSON metadata file to N-Quads
     """
     if request.method == "POST":
@@ -219,8 +217,21 @@ def store_selected_row(request):
 
         request.session['selected_row'] = selected_row
         request.session['current_header'] = current_header
+        request.session['redirect_link'] = selected_row[2] # The 3rd element of every row is URI
 
-        return JsonResponse({'status': 'ok'})
+        return JsonResponse({
+            'status': 'ok',
+            'redirect_link': selected_row[2]
+            })
+    
+    if request.method == "GET":
+        redirect_link = request.session.get('redirect_link')
+
+        return JsonResponse({
+            'status': 'ok',
+            'redirect_link': redirect_link
+        })
+    
     return JsonResponse({"error": 'Invalid request'}, status=400)
 
 
@@ -236,12 +247,14 @@ def insert_match(request):
         row_data = request.session.get('selected_row', [])
         header = request.session.get('current_header', '')
 
+
         # Insert the match into metadata 
         insert_instance(metadata_path, row_data, header)
 
         return redirect('convert_screen')
     return JsonResponse({"error": 'Invalid request'}, status=400)
         
+
 def save_file(request):
     """
     This function saves the file 
@@ -249,4 +262,18 @@ def save_file(request):
 
     if request.method == "POST":
         
-        return redirect('converter_screen')
+        # Get data from the form
+        json_text = request.POST.get('json_text', '')
+        metadata_path = request.session.get('metadata_file_path', '')
+
+        data = json.loads(json_text)
+
+        # Write to the file
+        if data:
+            with open(metadata_path, 'w', encoding='utf-8') as json_file:
+                json.dump(data, json_file, indent=2, ensure_ascii=False)
+
+        logger.info("Successfully saved the file")
+
+
+        return redirect('convert_screen')
