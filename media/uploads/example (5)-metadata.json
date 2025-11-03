@@ -59,7 +59,7 @@
                 "propertyUrl": "http://purl.org/healthcarevocab/v1#PersonIdentificationCodeSequence",
                 "vocab": "dicom",
                 "type": "property",
-                "score": 0.3950779
+                "score": 0.39739305
             },
             {
                 "name": "surname",
@@ -69,7 +69,7 @@
                 "propertyUrl": "http://dbpedia.org/ontology/Surname",
                 "vocab": "dbpedia-owl",
                 "type": "class",
-                "score": 0.5118588
+                "score": 0.5555556
             },
             {
                 "name": "male",
@@ -79,17 +79,17 @@
                 "propertyUrl": "http://dbpedia.org/ontology/championInDoubleMale",
                 "vocab": "dbpedia-owl",
                 "type": "property",
-                "score": 0.19389084
+                "score": 0.1919821
             },
             {
-                "name": "occupation",
+                "name": "occupationTesting",
                 "datatype": "string",
                 "@id": "http://dbpedia.org/ontology/occupation",
                 "prefixedName": "dbpedia-owl:occupation",
                 "propertyUrl": "http://dbpedia.org/ontology/occupation",
                 "vocab": "dbpedia-owl",
                 "type": "property",
-                "score": 0.61033094
+                "score": 0.60006016
             }
         ]
     },
