@@ -1,3 +1,6 @@
+lucide.createIcons();
+
+
 // Get input and label fields (guard if not present on this page)
 const fileInput = document.getElementById('csv_file')
 const fileLabelElement = document.querySelector('.file-label')

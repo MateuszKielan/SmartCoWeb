@@ -6,6 +6,7 @@
   <title>Smart Cow</title>
   <link rel="stylesheet" href="{% static 'converter/styles.css' %}">
   <link rel="icon" href="{% static 'converter/cow.ico' %}" type="image/x-icon">
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
   <!-- Header Bar -->
@@ -15,13 +16,57 @@
           <span></span>
           <span></span>
       </button>
-      <div class="app-title">Hello Hello Hello</div>
+      <div class="app-title">Smart Cow Web</div>
   </div>
 
   <!-- Navigation Bar -->
   <div class="navigation-side-bar" id="navigation-side-bar">
     <div class="menu-title-element">
-      Navigation
+      <p class="menu-title-text"> Navigation </p>
+    </div>
+    <div class="menu-content-container">
+
+      <div class="menu-section-container">
+        <p class="menu-section-title">DATA</p>
+        <button class="menu-section-element">
+            📁 Load Dataset
+        </button>
+        <button class="menu-section-element">
+            💾 Export Data
+        </button>
+        <button class="menu-section-element">
+            📝 Vocabulary Manager
+        </button>
+        <div class="menu-separator"></div>
+      </div>
+
+      <div class="menu-section-container">
+        <p class="menu-section-title">Source</p>
+        <button class="menu-section-element">
+            ⚙️ Configure Endpoint
+        </button>
+        <button class="menu-section-element">
+            💾 Export Data
+        </button>
+        <button class="menu-section-element">
+            📝 Vocabulary Manager
+        </button>
+        <div class="menu-separator"></div>
+      </div>
+
+      <div class="menu-section-container">
+        <p class="menu-section-title">HELP</p>
+        <button class="menu-section-element">
+            📚 Documentation
+        </button>
+        <button class="menu-section-element">
+            💬 Support
+        </button>
+        <button class="menu-section-element">
+            ℹ️ About
+        </button>
+        <div class="menu-separator"></div>
+      </div>
     </div>
   </div>
 

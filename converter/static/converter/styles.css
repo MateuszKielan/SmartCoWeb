@@ -144,10 +144,11 @@ body, html {
 
 /* NAVBAR STYLES */
 .header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1976D2 0%, #2196F3 100%);
   color: white;
   height: 5vh;
   display: flex;
+  gap: 20px;
   align-items: center;
   padding: 0 20px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -220,16 +221,59 @@ body, html {
 }
 
 .menu-title-element {
-  height: 10%;
+  height: 7%;
   width: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, #1976D2 0%, #2196F3 100%);
   display: flex;
   align-items: center;
-  font-size: 30px;
-  padding: 20px;
-  font-weight: 600;
 }
+
+.menu-title-text {
+  color: white;
+  font-size: 30px;
+  font-weight: 600;
+  margin-left: 20px;
+}
+
+/* Navbar Container */
+
+.menu-content-container {
+  height: 90%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-section-container {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+  height: 20%;
+}
+
+.menu-section-title {
+  font-size: 15px;
+  color: #999;
+}
+
+.menu-section-element {
+  width: 100%;
+  flex-grow: 0.5;
+  border: none;
+  background-color: #ffff;
+  transition: all 0.2s ease;
+}
+
+.menu-section-element:hover {
+  background-color: #f5f5f5;
+  padding-left: 45px;
+}
+
+.menu-separator {
+  width: 100%;
+  border-top: 0.7px solid #999;
+}
+
 
 /* CONVERTER SCREEN STYLES */
 /* Layout for 3-part panel */
