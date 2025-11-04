@@ -28,12 +28,12 @@
       <div class="menu-section-container">
         <p class="menu-section-title">DATA</p>
 
-        <button class="menu-section-element">
+        <button class="menu-section-element" onclick="window.location.href='{% url 'welcome' %}'">
             <span class="nav-button-icon">📁</span>
             <span class="nav-button-text">Load Dataset</span>
         </button>
 
-        <button class="menu-section-element">
+        <button class="menu-section-element"  onclick="triggerNQuadsConversion()">
           <span class="nav-button-icon"> 💾</span> 
           <span class="nav-button-text">Export Data</span>
         </button>
@@ -47,7 +47,7 @@
       </div>
 
       <div class="menu-section-container">
-        <p class="menu-section-title">SOURCE</p>
+        <p class="menu-section-title">TOOLS</p>
 
         <button class="menu-section-element">
           <span class="nav-button-icon">⚙️</span> 
@@ -55,13 +55,13 @@
         </button>
 
         <button class="menu-section-element">
-          <span class="nav-button-icon">💾</span> 
-          <span class="nav-button-text">Export Data</span>
+          <span class="nav-button-icon">🔍</span>
+          <span class="nav-button-text">Search</span>
         </button>
 
         <button class="menu-section-element">
-          <span class="nav-button-icon">📝</span> 
-          <span class="nav-button-text">Vocabulary Manager</span>
+          <span class="nav-button-icon">👁️</span> 
+          <span class="nav-button-text">Color Blind mode</span>
         </button>
 
         <div class="menu-separator"></div>
@@ -70,7 +70,7 @@
       <div class="menu-section-container">
         <p class="menu-section-title">HELP</p>
 
-        <button class="menu-section-element">
+        <button class="menu-section-element" id="documentation-button">
             <span class="nav-button-icon">📚</span> 
             <span class="nav-button-text"> Documentation</span>
         </button>
@@ -80,7 +80,7 @@
           <span class="nav-button-text">Support</span>
         </button>
 
-        <button class="menu-section-element">
+        <button class="menu-section-element" id="about-button">
           <span class="nav-button-icon">ℹ️</span> 
           <span class="nav-button-text">About</span>
         </button>

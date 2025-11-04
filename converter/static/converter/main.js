@@ -1,6 +1,8 @@
 // REMINDER FOR MY FUTURE SELF:::
 // REWRITE THIS ABOMINATION OF A CODE
-// Thanks (previous self)
+// Thanks! (curent self)
+//---------------------------
+
 
 // Get input and label fields (guard if not present on this page)
 const fileInput = document.getElementById('csv_file')
@@ -38,6 +40,21 @@ window.addEventListener('click', (e) => {
         navigationSideBar.classList.remove('active');
         overlay.classList.remove('active');
     }
+});
+
+function openMenuLink(link) {
+    const newTab = window.open('about:blank', '_blank');
+    newTab.location.href = link;
+}
+
+const aboutButton = document.getElementById('about-button');
+const documentationButton = document.getElementById('documentation-button');
+aboutButton.addEventListener('click', () => {
+    openMenuLink("https://github.com/MateuszKielan/BachelorThesis_CoW_Interface");
+});
+
+documentationButton.addEventListener('click', () => {
+    openMenuLink("https://mateuszkielan.github.io/BachelorThesis_CoW_Interface/")
 });
 
 // DON'T FORGET REMAKE TO OPEN HELPER POPUPS
