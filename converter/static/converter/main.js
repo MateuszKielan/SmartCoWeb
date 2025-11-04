@@ -1,3 +1,6 @@
+// REMINDER FOR MY FUTURE SELF:::
+// REWRITE THIS ABOMINATION OF A CODE
+// Thanks (previous self)
 
 // Get input and label fields (guard if not present on this page)
 const fileInput = document.getElementById('csv_file')
@@ -163,6 +166,20 @@ function create_vocabulary_table(vocabularyData) {
     
     thead.append(headerRow);
     table.append(thead);
+
+    for(const [key, value] of Object.entries(vocabularyData)) {
+        const bodyRow = document.createElement('tr'); 
+        const data = [key, value[0], value[1], value[2]];
+
+        for (let i = 0; i < data.length; i++) {
+            const bodyEntry = document.createElement('td');
+
+            bodyEntry.textContent = data[i];
+            bodyRow.appendChild(bodyEntry);
+        }
+        tbody.appendChild(bodyRow);
+    }
+    table.appendChild(tbody);
 
     console.log(vocabularyData);
 
