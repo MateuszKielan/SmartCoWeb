@@ -6,7 +6,6 @@
   <title>Smart Cow</title>
   <link rel="stylesheet" href="{% static 'converter/styles.css' %}">
   <link rel="icon" href="{% static 'converter/cow.ico' %}" type="image/x-icon">
-  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
   <!-- Header Bar -->
@@ -28,43 +27,64 @@
 
       <div class="menu-section-container">
         <p class="menu-section-title">DATA</p>
+
         <button class="menu-section-element">
-            📁 Load Dataset
+            <span class="nav-button-icon">📁</span>
+            <span class="nav-button-text">Load Dataset</span>
         </button>
+
         <button class="menu-section-element">
-            💾 Export Data
+          <span class="nav-button-icon"> 💾</span> 
+          <span class="nav-button-text">Export Data</span>
         </button>
+
         <button class="menu-section-element">
-            📝 Vocabulary Manager
+          <span class="nav-button-icon">📝</span> 
+          <span class="nav-button-text">Vocabulary Manager</span>
         </button>
+
         <div class="menu-separator"></div>
       </div>
 
       <div class="menu-section-container">
-        <p class="menu-section-title">Source</p>
+        <p class="menu-section-title">SOURCE</p>
+
         <button class="menu-section-element">
-            ⚙️ Configure Endpoint
+          <span class="nav-button-icon">⚙️</span> 
+          <span class="nav-button-text">Configure Endpoint</span>
         </button>
+
         <button class="menu-section-element">
-            💾 Export Data
+          <span class="nav-button-icon">💾</span> 
+          <span class="nav-button-text">Export Data</span>
         </button>
+
         <button class="menu-section-element">
-            📝 Vocabulary Manager
+          <span class="nav-button-icon">📝</span> 
+          <span class="nav-button-text">Vocabulary Manager</span>
         </button>
+
         <div class="menu-separator"></div>
       </div>
 
       <div class="menu-section-container">
         <p class="menu-section-title">HELP</p>
+
         <button class="menu-section-element">
-            📚 Documentation
+            <span class="nav-button-icon">📚</span> 
+            <span class="nav-button-text"> Documentation</span>
         </button>
+
         <button class="menu-section-element">
-            💬 Support
+          <span class="nav-button-icon">💬</span> 
+          <span class="nav-button-text">Support</span>
         </button>
+
         <button class="menu-section-element">
-            ℹ️ About
+          <span class="nav-button-icon">ℹ️</span> 
+          <span class="nav-button-text">About</span>
         </button>
+
         <div class="menu-separator"></div>
       </div>
     </div>
@@ -135,9 +155,9 @@
     {{ all_matches|json_script:"all-matches-data" }}
     {{ vocab_coverage_score|json_script:"vocab-coverage-score-data" }}
     {{ sorted_vocabs|json_script:"sorted-vocabs-data" }}
-    {{ best_match_index|json_script:"best-match-index-data"}}
-    {{ headers|json_script:"headers"}}
-
+    {{ best_match_index|json_script:"best-match-index-data" }}
+    {{ headers|json_script:"headers" }}
+    {{ vocabulary_data|json_script:"vocabulary-data" }}
 
     <!-- Resizable match window -->
     <div class="match-container" id="matchContainer">
@@ -257,7 +277,7 @@
         <div class="card">
           <h4><strong>Vocabulary Scores</strong></h4>
           <p>Vocabularies: </p>
-          <button class="card-button" id='card-button' data-header="Vocabularies">Show Scores</button>
+          <button class="card-button" id='vocab-card-button'>Show Scores</button>
         </div>
       
         <!-- Header Cards -->
@@ -269,7 +289,7 @@
                 <p>Type: {{ header }}  |  Matches: {{ value }} </p>
               {% endif %}
             {% endfor %}
-            <button class="card-button" data-header="{{ header }}">Show Matches</button>
+            <button class="card-button" id="card-button" data-header="{{ header }}">Show Matches</button>
           </div>
         {% endfor %}
       

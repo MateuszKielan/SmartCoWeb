@@ -125,6 +125,7 @@ def convert_screen_view(request):
         "vocab_coverage_score": request.session.get('vocab_coverage_score'),
         "sorted_vocabs": request.session.get('sorted_vocabs'),
         "best_match_index": request.session.get('best_match_index'),
+        'vocabulary_data': request.session.get("vocabulary_data"),
         "matches_count": matches_count
     })
 
@@ -178,8 +179,8 @@ def welcome_view(request):
             engine = Engine(headers)
 
             # Compute necessary scores + retrieve the matches from recommender engine
-            sorted_vocabs, best_match_index, vocab_coverage_score, all_matches = engine.run_lov_requests()
-            
+            vocabulary_data, avg_scores, sorted_vocabs, best_match_index, vocab_coverage_score, all_matches = engine.run_lov_requests()
+
             best_match_index = {header:index for header, index in best_match_index}
            
             vocab_coverage_score = sorted(vocab_coverage_score, key=lambda score: score[1], reverse=True)
@@ -194,10 +195,11 @@ def welcome_view(request):
             request.session['csv_path'] = csv_path
             request.session['vocab_coverage_score'] = vocab_coverage_score
             request.session['sorted_vocabs'] = sorted_vocabs
+            request.session['vocabulary_data'] = vocabulary_data
 
             logger.info(request.session['request_type'])
             logger.info(request.session['metadata_file_path'])
-
+            logger.info(f"AVERAGE SCORES::: {request.session.get('vocabulary_data')}")
             # Overwrite the template metadata file with the best matches
             update_metadata(metadata_file_path, headers, all_matches, best_match_index, 'Homogenous', '')
 

@@ -1,5 +1,3 @@
-lucide.createIcons();
-
 
 // Get input and label fields (guard if not present on this page)
 const fileInput = document.getElementById('csv_file')
@@ -129,14 +127,47 @@ matchTables.forEach(table => {
                     selected_row: rowValues,
                     current_header: currentHeader
                  })
-              });
+            });
         }
     });
 });
 
-function create_vocabulary_table(sortedVocabs, vocabCoverageScore) {
-    const listOfTitles = ['Vocabulary']
-}
+
+function create_vocabulary_table(vocabularyData) {
+    const listOfTitles = ['Vocabulary', 'Average Match Score', ' Nr of Produced Matches', 'Combi Score'];
+
+    const popup = document.getElementById('matchContainer');
+    const title = document.getElementById('match-header-text');
+    const table = document.getElementById('match-table');
+
+    // Create the table headers
+    const thead = document.createElement('thead');
+    const tbody = document.createElement('tbody');
+    const headerRow = document.createElement('tr');
+
+    const bestMatchTable = document.getElementById('best-match-table');
+    const matchHeaderText = document.getElementById('match-header-text');
+
+    matchHeaderText.textContent = 'Vocabulary ranking';
+    bestMatchTable.style.display = 'None';
+
+    table.innerHTML = "";
+
+    listOfTitles.forEach(title => {
+
+        const th = document.createElement('th');
+        th.textContent = title;
+        headerRow.appendChild(th);
+
+    })
+    
+    thead.append(headerRow);
+    table.append(thead);
+
+    console.log(vocabularyData);
+
+    popup.style.display = 'block';
+};
 
 
 function create_match_tables(header) {
@@ -166,8 +197,6 @@ function create_match_tables(header) {
     // Retrieve data
     const allMatches = JSON.parse(document.getElementById('all-matches-data').textContent);
     const bestMatchIndexes = JSON.parse(document.getElementById('best-match-index-data').textContent);
-    const vocabCoverageScore = JSON.parse(document.getElementById('vocab-coverage-score-data').textContent);
-    const sortedVocabs = JSON.parse(document.getElementById('sorted-vocabs-data').textContent);
     const listOfTitles = ['prefixedName', 'vocabualry.prefix', 'uri', 'type', 'score'];
 
     table.innerHTML = "";
@@ -177,7 +206,7 @@ function create_match_tables(header) {
      if (header == "Vocabularies") {
         // HERE CALL THE FUNCTION to build vocabulary table 
         console.log(vocabCoverageScore);
-        console.log(sortedVocabs)
+        console.log(sortedVocabs);
 
         return;
     }
@@ -244,16 +273,25 @@ function create_match_tables(header) {
     popup.style.display = 'block';
 }
 
+const cardVocabButton = document.getElementById('vocab-card-button');
+const cardButtons = document.querySelectorAll('#card-button');
 
-const cardButtons = document.querySelectorAll('.card-button');
 // This creates a table dynamically when clicked on the corresponding header card 
 cardButtons.forEach(button => {
-        button.addEventListener('click', function() {
+    button.addEventListener('click', function() {
         
         const header = this.dataset.header;
         create_match_tables(header);
-       
+
     });
+});
+
+cardVocabButton.addEventListener('click', function() {
+    const vocabCoverageScore = JSON.parse(document.getElementById('vocab-coverage-score-data').textContent);
+    const sortedVocabs = JSON.parse(document.getElementById('sorted-vocabs-data').textContent);
+    const vocabularyData = JSON.parse(document.getElementById('vocabulary-data').textContent);
+
+    create_vocabulary_table(vocabularyData);
 });
 
 const searchButton = document.getElementById('search-button');
