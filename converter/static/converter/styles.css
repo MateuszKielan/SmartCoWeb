@@ -900,3 +900,65 @@ body, html {
 .match-table tr:hover {
   background-color: #A69F9F;
 }
+
+/* Color-blind friendly palette overrides (toggle by adding .color-blind to <html> or <body>) */
+.color-blind .header,
+.color-blind .menu-title-element {
+  /* switch to blue/orange palette for better color-blind contrast */
+  background: linear-gradient(135deg, #E69F00 0%, #F0C040 100%) !important;
+}
+
+.color-blind .hamburger {
+  background: rgba(0,0,0,0.08) !important;
+}
+
+.color-blind .hamburger span {
+  background: #2b2b2b !important;
+}
+
+.color-blind .request-type-button,
+.color-blind .replace-all-button,
+.color-blind .search-button,
+.color-blind .card-button,
+.color-blind .load-button,
+.color-blind .close-button,
+.color-blind .json-button.convert-button {
+  background-color: #E69F00 !important;
+  color: #111 !important;
+}
+
+.color-blind .request-type-button.active {
+  background-color: #000000 !important;
+  color: #fff !important;
+}
+
+.color-blind .save-button {
+  background-color: #2E7D32 !important;
+  color: #fff !important;
+}
+
+.color-blind .panel-right {
+  background-color: #dcdcdc !important;
+}
+
+.color-blind .navigation-side-bar {
+  background-color: #fffbe6 !important;
+}
+
+.color-blind .menu-section-element:hover {
+  background-color: #fff3d1 !important;
+  padding-left: 45px;
+}
+
+.color-blind .match-header {
+  background: #f7f1e0 !important;
+}
+
+/* Ensure high contrast for icon text */
+.color-blind .nav-button-text,
+.color-blind .menu-title-text,
+.color-blind .panel-title,
+.color-blind .card p,
+.color-blind .sub-title {
+  color: #111 !important;
+}

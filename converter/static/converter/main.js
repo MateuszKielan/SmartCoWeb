@@ -24,19 +24,25 @@ function toggleSideBar(){
 
 const toggleMenuButton = document.getElementById('hamburger');
 
-toggleMenuButton.addEventListener('click', () => {
-    toggleSideBar()
-})
-
+if (toggleMenuButton) {
+    toggleMenuButton.addEventListener('click', () => {
+        toggleSideBar();
+    });
+} else {
+    console.warn('hamburger button not found');
+}
 
 window.addEventListener('click', (e) => {
     const navigationSideBar = document.getElementById('navigation-side-bar');
     const overlay = document.getElementById('main-overlay');
     
-    // If sidebar is open and click is outside sidebar
-    if (navigationSideBar.classList.contains('active') && 
-        !navigationSideBar.contains(e.target) && 
-        e.target !== hamburger) {
+    if (!navigationSideBar || !overlay) return;
+
+    // If sidebar is open and click is outside sidebar and outside the hamburger button
+    const clickedOnHamburger = toggleMenuButton && toggleMenuButton.contains(e.target);
+    if (navigationSideBar.classList.contains('active') &&
+        !navigationSideBar.contains(e.target) &&
+        !clickedOnHamburger) {
         navigationSideBar.classList.remove('active');
         overlay.classList.remove('active');
     }
@@ -335,6 +341,28 @@ searchButton.addEventListener('click', function(){
     create_match_tables(header_search);
 });
 
+// Nav search. open popup, focus input and run same create_match_tables functions
+const navSearchButton = document.getElementById('nav-search-button');
+const navSearchSubmit = document.getElementById('nav-search-submit');
+
+if (navSearchButton) {
+    navSearchButton.addEventListener('click', () => {
+        openHelperPopup('nav-search-helper');
+        setTimeout(() => {
+            const inp = document.getElementById('nav-header-search');
+            if (inp) inp.focus();
+        }, 50);
+    });
+}
+
+if (navSearchSubmit) {
+    navSearchSubmit.addEventListener('click', () => {
+        const val = document.getElementById('nav-header-search').value;
+        closeHelperPopup('nav-search-helper');
+        create_match_tables(val);
+    });
+}
+
 
 const sourceButton = document.getElementById('source-btn');
 
@@ -384,7 +412,7 @@ if (resizer) {
 
 function resize(e) {
   if (!isResizing) return;
-  const dy = startY - e.clientY; // drag up = increase height
+  const dy = startY - e.clientY;
   container.style.height = `${startHeight + dy}px`;
 }
 
@@ -393,3 +421,31 @@ function stopResize() {
   document.removeEventListener('mousemove', resize);
   document.removeEventListener('mouseup', stopResize);
 }
+
+// Color-blind toggle button logic 
+const colorBlindButton = document.getElementById('colorblind-button');
+
+function setColorBlindMode(enabled) {
+    document.documentElement.classList.toggle('color-blind', enabled);
+    if (colorBlindButton) {
+        colorBlindButton.classList.toggle('active', enabled);
+        colorBlindButton.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+    }
+    try {
+        localStorage.setItem('colorBlindMode', enabled ? '1' : '0');
+    } catch (e){}
+}
+
+if (colorBlindButton) {
+    colorBlindButton.addEventListener('click', () => {
+        const enabled = !document.documentElement.classList.contains('color-blind');
+        setColorBlindMode(enabled);
+    });
+}
+
+// Apply saved preference on load
+try {
+    if (localStorage.getItem('colorBlindMode') === '1') {
+        setColorBlindMode(true);
+    }
+} catch (e){}

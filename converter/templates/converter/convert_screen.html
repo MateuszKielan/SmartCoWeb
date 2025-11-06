@@ -54,12 +54,12 @@
           <span class="nav-button-text">Configure Endpoint</span>
         </button>
 
-        <button class="menu-section-element">
+        <button class="menu-section-element" id="nav-search-button">
           <span class="nav-button-icon">🔍</span>
           <span class="nav-button-text">Search</span>
         </button>
 
-        <button class="menu-section-element">
+        <button class="menu-section-element" id="colorblind-button" aria-pressed="false" title="Toggle color blind friendly palette">
           <span class="nav-button-icon">👁️</span> 
           <span class="nav-button-text">Color Blind mode</span>
         </button>
@@ -323,6 +323,22 @@
 
   </div>
   
+  <!-- Nav Search Helper Popup (quick search from navbar) -->
+    <div class="helper-popup" id="nav-search-helper">
+      <div class="helper-popup-content">
+        <div class="helper-popup-header">
+          <h2 class="helper-popup-title">Quick Search</h2>
+        </div>
+        <div class="helper-popup-body">
+          <input type="text" id="nav-header-search" placeholder="Enter header name" class="header-search" />
+          <div style="margin-top:12px;">
+            <button class="search-button" id="nav-search-submit">Show Matches</button>
+            <button class="close-button" onclick="closeHelperPopup('nav-search-helper')">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   <script src="{% static 'converter/main.js' %}"></script>
 </body>
 </html>
