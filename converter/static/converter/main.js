@@ -457,3 +457,13 @@ if (supportButton) {
         openHelperPopup('support-form-popup');
     });
 }
+
+
+// THIS IS THE SECTION FOR VOCABULARY MANGER (!Restructure this later to be in a proper chronological place!)
+const vocabManagerButton = document.getElementById('nav-vocabulary-manager-button');
+
+if (vocabManagerButton)  {
+    vocabManagerButton.addEventListener('click', () => {
+        openHelperPopup('vocabulary-manager-helper-popup');
+    });
+}

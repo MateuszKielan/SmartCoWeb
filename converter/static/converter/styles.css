@@ -434,22 +434,23 @@ body, html {
     align-items: center;
     width: 85%;
     gap: 10px;
-    margin: 0 auto 20px auto;  /* Add this line to center the block */
+    margin: 0 auto 20px auto;
   }
 
   .header-search {
-    height: 3vh;  /* Changed from 2vh to 3vh to match button */
+    height: 3vh;
     border-radius: 3px;
     outline: none;
     width: 80%;
   } 
+
   .header-search:focus {
     border-color: #2196F3;
   }
 
   .search-button{
     width: 20%;
-    height: 3vh;  /* Already 3vh, keeps button same height */
+    height: 3vh; 
     border-radius: 4px;
     cursor: pointer;
     outline: none;
@@ -985,11 +986,137 @@ body, html {
   background: #f7f1e0 !important;
 }
 
-/* Ensure high contrast for icon text */
 .color-blind .nav-button-text,
 .color-blind .menu-title-text,
 .color-blind .panel-title,
 .color-blind .card p,
 .color-blind .sub-title {
   color: #111 !important;
+}
+
+
+/* Vocabulary Manger Styles */
+
+.vocabulary-manager-helper-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 1003;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  display: none;
+}
+
+.vocabulary-manager-popup-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 25%;
+  height: 55%;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.helper-popup-header-vocabulary-manager {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.helper-popup-title-vocabulary {
+  margin:0;
+  margin-left: 20px;
+  font-size: 25px;
+}
+
+.solid-separator-popup{
+  width: 100%;
+  border-top: 0.5px solid #999;
+}
+
+.match-close-vocabulary-manager {
+  margin: 0;
+  margin-right: 20px;
+  background: none;
+  border: 2px solid;
+  font-size: 18px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.match-close-vocabulary-manager:hover {
+  background-color: rgb(41, 40, 40);
+  color: white;
+}
+
+.vocabulary-manager-helper-popup-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.vocabulary-manager-description {
+  margin: 10px 20px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.vocabulary-manager-input-field {
+  display: flex;
+  gap: 8px;
+  width: 95%;
+  margin: 10px auto;
+}
+
+.input-vocabulary-manager {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #8a8a8a;
+  outline: none;
+  font-size: 1rem;
+  background: #fff;
+  height: 40px;
+  box-sizing: border-box;
+}
+
+.input-vocabulary-manager:focus {
+  border-color: #2196F3;
+  box-shadow: 0 0 0 3px rgba(33,150,243,0.1);
+}
+
+.add-vocabulary-manager {
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  outline: none;
+  font-size: 0.9rem;
+  transition: background-color 0.15s ease;
+  background-color: #2196F3;
+  color: #ffffff;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.add-vocabulary-manager:hover {
+  background-color: #1976D2;
+}
+
+@media (max-width: 480px) {
+  .vocabulary-manager-input-field {
+    flex-direction: column;
+  }
+
+  .add-vocabulary-manager {
+    width: 100%;
+  }
 }
