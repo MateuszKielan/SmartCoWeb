@@ -50,7 +50,7 @@ def get_csv_headers(file_path: str) -> list:
 
 
 def convert_json_to_nquads(selected_file):
-# Check if the file exists
+    # Check if the file exists
     if not selected_file.exists():
         logger.error(f"System: CSV file does not exist at: {selected_file}")
     else:
