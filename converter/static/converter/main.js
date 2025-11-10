@@ -449,3 +449,11 @@ try {
         setColorBlindMode(true);
     }
 } catch (e){}
+
+// Support form handling
+const supportButton = document.getElementById('support-button');
+if (supportButton) {
+    supportButton.addEventListener('click', () => {
+        openHelperPopup('support-form-popup');
+    });
+}

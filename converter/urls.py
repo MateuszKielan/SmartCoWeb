@@ -10,5 +10,6 @@ urlpatterns = [
     path('request_type/<str:request_type>', views.set_request_type, name='set_request_type'),
     path('store_selected_row/', views.store_selected_row, name='store_selected_row'),
     path('insert_match', views.insert_match, name='insert_match'),
-    path('save_file', views.save_file, name='save_file')
+    path('save_file', views.save_file, name='save_file'),
+    path('submit-support/', views.submit_support, name='submit_support'),
 ]

@@ -12,6 +12,7 @@ import logging
 from .engine import Engine
 import csv
 from django.http import JsonResponse
+from .models import Support
 
 
 
@@ -284,3 +285,21 @@ def save_file(request):
 
 
         return redirect('convert_screen')
+
+
+def submit_support(request):
+    """Handle support form submissions"""
+    if request.method == "POST":
+        try:
+            Support.objects.create(
+                title=request.POST.get('title'),
+                message=request.POST.get('message'),
+                contact=request.POST.get('contact') or None
+            )
+            return render('convert_screen')
+        except Exception as e:
+            return JsonResponse({
+                "status": "error",
+                "message": "Sorry, there was an error submitting your request."
+            }, status=500)
+    return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)

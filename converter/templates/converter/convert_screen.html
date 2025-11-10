@@ -72,10 +72,10 @@
 
         <button class="menu-section-element" id="documentation-button">
             <span class="nav-button-icon">📚</span> 
-            <span class="nav-button-text"> Documentation</span>
+            <span class="nav-button-text"> Documentation (Dev)</span>
         </button>
 
-        <button class="menu-section-element">
+        <button class="menu-section-element" id="support-button">
           <span class="nav-button-icon">💬</span> 
           <span class="nav-button-text">Support</span>
         </button>
@@ -338,6 +338,33 @@
         </div>
       </div>
     </div>
+
+  <!-- Support Form Popup -->
+<div class="helper-popup" id="support-form-popup">
+    <div class="helper-popup-content">
+        <div class="helper-popup-header">
+            <h2 class="helper-popup-title">Support Request</h2>
+        </div>
+        <div class="helper-popup-body">
+            <form method="POST" action="{% url 'submit_support' %}" class="support-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <input type="text" name="title" placeholder="Title" required class="support-input">
+                </div>
+                <div class="form-group">
+                    <textarea name="message" placeholder="Your message" required class="support-textarea"></textarea>
+                </div>
+                <div class="form-group">
+                    <input type="email" name="contact" placeholder="Contact email (optional)" class="support-input">
+                </div>
+                <div style="margin-top:12px;">
+                    <button type="submit" class="search-button">Submit</button>
+                    <button type="button" class="close-button" onclick="closeHelperPopup('support-form-popup')">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
   <script src="{% static 'converter/main.js' %}"></script>
 </body>
