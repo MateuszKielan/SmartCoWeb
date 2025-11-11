@@ -97,15 +97,18 @@
     <div class="vocabulary-manager-popup-content">
       <div class="helper-popup-header-vocabulary-manager">
         <h2 class="helper-popup-title-vocabulary">Vocabulary Manager</h2>
-        <button class="match-close-vocabulary-manager" onclick="closeHelperPopup('matchContainer')">x</button>
+        <button class="match-close-vocabulary-manager" onclick="closeHelperPopup('vocabulary-manager-helper-popup')">x</button>
       </div>
       <hr class="solid-separator-popup">
       <div class="vocabulary-manager-helper-popup-body">
-        <p class="vocabulary-manager-description">Set the priority order for vocabulary recommendations. Reorder using controls below.</p>
+        <p class="vocabulary-manager-description">Set the priority order for vocabulary recommendations. Reorder using controls below. When done with the mapping simply press the submit button. The system will take care of the rest.</p>
         <div class="vocabulary-manager-input-field">
           <input type="text" id="input-vocabulary-manager" placeholder="Enter vocabulary name" class="input-vocabulary-manager" />
-          <button class="add-vocabulary-manager" id="add-vocabulary-manager">Add</button>
+          <button class="add-vocabulary-manager" id="add-vocabulary-manager" onclick="addVocabulary()">Add</button>
         </div>
+      </div>
+      <div class="vocabulary-manager-footer">
+       <button id="submit-vocabulary-manager" class="submit-vocabulary-manager" onclick="submitPriorityList()">Submit</button>
       </div>
     </div>
   </div>

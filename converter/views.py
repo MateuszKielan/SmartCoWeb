@@ -303,3 +303,14 @@ def submit_support(request):
                 "message": "Sorry, there was an error submitting your request."
             }, status=500)
     return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
+
+
+def process_priority_list(request):
+    """Process the priority list from vocabulary manager"""
+
+    if request.method == "POST":
+
+        priority_list = request.POST.get('priority_list')
+        logger.info(f"List: {priority_list}")
+
+        return render('convert_screen')

@@ -12,4 +12,5 @@ urlpatterns = [
     path('insert_match', views.insert_match, name='insert_match'),
     path('save_file', views.save_file, name='save_file'),
     path('submit-support/', views.submit_support, name='submit_support'),
+    path('vocabulary_manager/', views.process_priority_list, name='vocabulary_manager')
 ]

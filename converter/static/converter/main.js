@@ -3,6 +3,7 @@
 // Thanks! (curent self)
 //---------------------------
 
+let vocabularyManager = [];
 
 // Get input and label fields (guard if not present on this page)
 const fileInput = document.getElementById('csv_file')
@@ -466,4 +467,147 @@ if (vocabManagerButton)  {
     vocabManagerButton.addEventListener('click', () => {
         openHelperPopup('vocabulary-manager-helper-popup');
     });
+}
+
+// Render Vocabulary Manager
+// Add Vocabulary
+function renderVocabularyManager() {
+    const popup = document.getElementById('vocabulary-manager-helper-popup');
+
+    let listContainer = document.getElementById('vocabulary-manager-list');
+
+    if (!listContainer) {
+        listContainer = document.createElement('div');
+        listContainer.id = 'vocabulary-manager-list';
+        listContainer.className = 'vocabulary-manager-list';
+        const body = popup.querySelector('.vocabulary-manager-helper-popup-body');
+        if (body) body.appendChild(listContainer);
+    }
+
+    listContainer.innerHTML = '';
+
+    if (vocabularyManager.length === 0) {
+        const empty = document.createElement('p');
+        empty.textContent = 'No vocabularies added.';
+        empty.className = 'vocab-empty';
+        listContainer.appendChild(empty);
+        return;
+    }
+
+    vocabularyManager.forEach((name, idx) => {
+        const card = document.createElement('div');
+        card.className = 'vocabulary-card';
+
+        const left = document.createElement('div');
+        left.className = 'vocab-left';
+
+        const right = document.createElement('div');
+        right.className = "vocab-right";
+
+        const pri = document.createElement('div');
+        pri.className = 'vocab-priority';
+        pri.textContent = (idx + 1);
+
+        const nm = document.createElement('div');
+        nm.className = 'vocab-name';
+        nm.textContent = name;
+
+        const del = document.createElement('button');
+        del.className = 'vocab-delete';
+        del.textContent = 'X';
+
+        const up = document.createElement('button');
+        up.className = 'vocab-up';
+        up.textContent = '↑';
+
+        const down = document.createElement('button');
+        down.className = 'vocab-down';
+        down.textContent = '↓';
+        
+        del.addEventListener('click', () => {
+            removeVocabulary(idx);
+        });
+
+        up.addEventListener('click', () => {
+            rearangeVocabulary(idx, 1);
+        });
+        
+        down.addEventListener('click', () => {
+            rearangeVocabulary(idx, -1);
+        });
+
+        left.appendChild(pri);
+        left.appendChild(nm);
+
+        card.appendChild(left);
+        card.appendChild(right);
+
+        right.appendChild(up);
+        right.appendChild(down);
+        right.appendChild(del);
+
+        listContainer.appendChild(card);
+    });
+}
+
+// Add Vocabulary 
+// Adds vocabualry to the 
+function addVocabulary() {
+    const vocabName = document.getElementById('input-vocabulary-manager').value;
+
+    // If nothing entered
+    if (!vocabName) return;
+
+    // Check for duplicates
+    if (vocabularyManager.includes(vocabName)) {
+        vocabName.value = '';
+        return;
+    }
+
+    vocabularyManager.push(vocabName);
+    vocabName.value = '';
+    
+    renderVocabularyManager();
+}
+
+// Removes the vocabualry form the list and refreshes the list. 
+function removeVocabulary(index) {
+    vocabularyManager.splice(index, 1);
+
+    // Render Vocabulary Manager
+    renderVocabularyManager();
+}
+
+// Rearange Vocabulary
+// Moves the vocabualry up or down in the priority list based on user input.
+function rearangeVocabulary(index, move) {
+
+    if (vocabularyManager.length <= 1) return;
+
+    if (move == 1) {
+        [vocabularyManager[index], vocabularyManager[index - 1]] = [vocabularyManager[index - 1], vocabularyManager[index]];
+        renderVocabularyManager();
+    } else {
+        [vocabularyManager[index], vocabularyManager[index + 1]] = [vocabularyManager[index + 1], vocabularyManager[index]];
+        renderVocabularyManager();
+    };
+}
+
+
+// Submit Vocabulary Manager
+function submitPriorityList() {
+
+    if(!vocabularyManager) return;
+
+    fetch('/vocabulary_manager/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ 
+            priority_list: vocabularyManager
+        })
+    });
+
 }
