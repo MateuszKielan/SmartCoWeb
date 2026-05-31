@@ -4,6 +4,48 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def _namespace_from_uri(uri: str) -> str:
+    """
+    Return the namespace part of a term URI (everything up to and including the
+    last '#' or '/'). E.g. 'http://dbpedia.org/ontology/Surname' ->
+    'http://dbpedia.org/ontology/'.
+    """
+    if not uri:
+        return ""
+    if "#" in uri:
+        return uri.rsplit("#", 1)[0] + "#"
+    if "/" in uri:
+        return uri.rsplit("/", 1)[0] + "/"
+    return uri
+
+
+def _add_namespaces(data: dict, entries) -> None:
+    """
+    Ensure each (prefix -> namespace URI) pair exists in the @context namespaces
+    map, so the prefixedName values written for the selected matches resolve.
+
+    Existing prefixes are left untouched (the CoW base list wins).
+    """
+    ctx = data.get("@context")
+    if not isinstance(ctx, list):
+        return
+
+    # The namespaces entry is the @context object that has non-'@' keys.
+    ns_obj = next(
+        (el for el in ctx
+         if isinstance(el, dict) and any(not k.startswith("@") for k in el)),
+        None,
+    )
+    if ns_obj is None:
+        ns_obj = {}
+        ctx.append(ns_obj)
+
+    for prefix, uri in entries:
+        if prefix and uri and prefix not in ns_obj:
+            ns_obj[prefix] = uri
+            logger.info(f"[Namespace] Added '{prefix}': '{uri}'")
+
+
 def update_metadata(path, headers, all_results, request_results, mode, custom_endpoint):
     """
     Function update_metadata that overwrites the metadata file with the best matches.
@@ -27,20 +69,31 @@ def update_metadata(path, headers, all_results, request_results, mode, custom_en
     }
 
     # Insert the best match
+    ns_entries = []
     for column in data.get('tableSchema', {}).get('columns', []):
         header = column.get('name')
         if header in all_results and header in index_lookup:
             match = all_results[header][index_lookup[header]]
 
+            prefixed_name = match[0][0] if custom_endpoint == "" else match[0]
+            uri = match[2][0] if custom_endpoint == "" else match[2]
+
             column.update({
                 'name': header,
-                'prefixedName': match[0][0] if custom_endpoint == "" else match[0],
-                '@id': match[2][0] if custom_endpoint == "" else match[2],
-                'propertyUrl': match[2][0] if custom_endpoint == "" else match[2],
+                'prefixedName': prefixed_name,
+                '@id': uri,
+                'propertyUrl': uri,
                 'vocab': match[1],
                 'type': match[3],
                 'score': match[4],
             })
+
+            # Register the namespace for the prefix used in prefixedName.
+            prefix = prefixed_name.split(":", 1)[0] if ":" in str(prefixed_name) else match[1]
+            ns_entries.append((prefix, _namespace_from_uri(uri)))
+
+    # Add the namespaces of the selected vocabularies to @context.
+    _add_namespaces(data, ns_entries)
 
     # Write new data into the file
     with open(path, 'w', encoding='utf-8') as json_file:
@@ -88,6 +141,11 @@ def insert_instance(path, row, header):
 
             updated = True # If replaced update the flag
             logger.info(f"[Inserted] {header} -> {name} ({vocab})")
+
+    # Register the namespace for the inserted match's prefix.
+    if updated:
+        prefix = name.split(":", 1)[0] if ":" in str(name) else vocab
+        _add_namespaces(data, [(prefix, _namespace_from_uri(uri))])
 
     # Display warning
     if not updated:

@@ -5,13 +5,16 @@ from django.shortcuts import render, redirect
 from django.conf import settings
 import os
 import json
-from .utils import convert_with_cow, get_csv_headers, convert_json_to_nquads 
+from .utils import convert_with_cow, get_csv_headers, convert_json_to_nquads, detect_delimiter
 from .metadata import update_metadata, insert_instance
 from pathlib import Path
 import logging
 from .engine import Engine
+from .requests_t import rank_with_priority
+from . import storage
 import csv
-from django.http import JsonResponse
+from django.http import JsonResponse, FileResponse
+from django.urls import reverse
 from .models import Support
 
 
@@ -33,7 +36,11 @@ def convert_to_nquads_view(request):
 
         try:
             convert_json_to_nquads(csv_path)
-            return JsonResponse({"status": "success", "message": "Converted to N-Quads successfully."})
+            return JsonResponse({
+                "status": "success",
+                "message": "Converted to N-Quads successfully.",
+                "download_url": reverse("download_nquads"),
+            })
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
@@ -46,16 +53,18 @@ def replace_all(request):
     Call the update_metadata function to overwrite the metadata file with best matches
     """
     if request.method == "POST":
-        
-        update_metadata(     
-            request.session.get('metadata_file_path', ''), 
-            request.session.get('headers', []),
-            request.session.get('all_matches', {}),
-            request.session.get('best_match_index', 0),
+
+        job_data = storage.get_recommender_data(request.session)
+
+        update_metadata(
+            request.session.get('metadata_file_path', ''),
+            job_data.get('headers', []),
+            job_data.get('all_matches', {}),
+            job_data.get('best_match_index', {}),
             request.session.get('request_type', 'Homogenous'),
             request.session.get('custom_endpoint', '')
         )
-        
+
     return redirect('convert_screen')
         #return JsonResponse({"status": "success", "message": "The button has been clicked"})
 
@@ -88,9 +97,10 @@ def convert_screen_view(request):
         return render(request, "converter/error.html", {"message": "CSV file not found"})
 
 
-    # Open and process the csv file
+    # Open and process the csv file (detect the delimiter so e.g. ';' files
+    # are not collapsed into a single column).
     with open(csv_path, newline='', encoding='utf-8') as f:
-        reader = csv.reader(f)
+        reader = csv.reader(f, delimiter=detect_delimiter(csv_path))
         all_rows = list(reader)
         headers = all_rows[0]
         data_rows = all_rows[1:]
@@ -99,8 +109,11 @@ def convert_screen_view(request):
         full_table = data_rows
         preview_rows = data_rows[:20]
 
+    # Retrieve the recommender payload from the cache (not the session).
+    job_data = storage.get_recommender_data(request.session)
+    all_matches = job_data.get('all_matches', {})
+
     # Retrieve num of matches for each header
-    all_matches = request.session.get('all_matches', {})
     matches_count = {header: len(all_matches[header]) for header in all_matches }
 
     # Load JSON metadata file 
@@ -121,12 +134,12 @@ def convert_screen_view(request):
         "rows": preview_rows,
         "full_table": full_table,
         "json_content": json_content,
-        "all_matches": request.session.get("all_matches", {}),
+        "all_matches": all_matches,
         "request_type": request.session.get('request_type'),
-        "vocab_coverage_score": request.session.get('vocab_coverage_score'),
-        "sorted_vocabs": request.session.get('sorted_vocabs'),
-        "best_match_index": request.session.get('best_match_index'),
-        'vocabulary_data': request.session.get("vocabulary_data"),
+        "vocab_coverage_score": job_data.get('vocab_coverage_score'),
+        "sorted_vocabs": job_data.get('sorted_vocabs'),
+        "best_match_index": job_data.get('best_match_index'),
+        'vocabulary_data': job_data.get("vocabulary_data"),
         "matches_count": matches_count
     })
 
@@ -139,9 +152,24 @@ def convert_screen_view(request):
 # After the conversion the welcome_view renders the main converter screen of SmartCow 
 #---------------------------------------------------------------------
 
+def _user_upload_dir(request):
+    """
+    Return a per-session upload directory, creating it if needed.
+
+    Isolating each visitor's files under their session id prevents one user's
+    upload from overwriting another's when they happen to share a filename
+    (e.g. two people both uploading "data.csv" on the shared server).
+    """
+    if not request.session.session_key:
+        request.session.create()
+    upload_dir = os.path.join(settings.MEDIA_ROOT, 'uploads', request.session.session_key)
+    os.makedirs(upload_dir, exist_ok=True)
+    return upload_dir
+
+
 def welcome_view(request):
     """
-    Main function that renders the starting page on the website. 
+    Main function that renders the starting page on the website.
     It also stores the uploaded file and creates the metadata from it.
     Starts the vocabulary recommendation process.
     """
@@ -156,9 +184,8 @@ def welcome_view(request):
         if uploaded_file:
             file_name = uploaded_file.name
 
-            # Save uploaded file to server
-            upload_dir = os.path.join(settings.MEDIA_ROOT, 'uploads')
-            os.makedirs(upload_dir, exist_ok=True)
+            # Save the uploaded file to this user's private upload folder.
+            upload_dir = _user_upload_dir(request)
             csv_path = os.path.join(upload_dir, file_name)
 
             with open(csv_path, 'wb+') as dest:
@@ -183,24 +210,30 @@ def welcome_view(request):
             vocabulary_data, avg_scores, sorted_vocabs, best_match_index, vocab_coverage_score, all_matches = engine.run_lov_requests()
 
             best_match_index = {header:index for header, index in best_match_index}
-           
+
             vocab_coverage_score = sorted(vocab_coverage_score, key=lambda score: score[1], reverse=True)
 
-            # Store vocabulary-recommender related parameters in session for retrieval
+            # Fresh upload: drop any cached results from a previous job.
+            storage.clear_job(request.session)
+
+            # Keep only small identifiers in the session.
             request.session['request_type'] = 'Homogenous'
             request.session['metadata_file_path'] = metadata_file_path
-            request.session['headers'] = headers
-            request.session['all_matches'] = all_matches
-            request.session['best_match_index'] = best_match_index
             request.session['custom_endpoint'] = ""
             request.session['csv_path'] = csv_path
-            request.session['vocab_coverage_score'] = vocab_coverage_score
-            request.session['sorted_vocabs'] = sorted_vocabs
-            request.session['vocabulary_data'] = vocabulary_data
+
+            # Store the heavy recommender payload in the cache, not the session.
+            storage.save_recommender_data(request.session, {
+                'headers': headers,
+                'all_matches': all_matches,
+                'best_match_index': best_match_index,
+                'vocab_coverage_score': vocab_coverage_score,
+                'sorted_vocabs': sorted_vocabs,
+                'vocabulary_data': vocabulary_data,
+            })
 
             logger.info(request.session['request_type'])
             logger.info(request.session['metadata_file_path'])
-            logger.info(f"AVERAGE SCORES::: {request.session.get('vocabulary_data')}")
             # Overwrite the template metadata file with the best matches
             update_metadata(metadata_file_path, headers, all_matches, best_match_index, 'Homogenous', '')
 
@@ -213,82 +246,126 @@ def welcome_view(request):
     })
 
 
-def store_selected_row(request):
-    """
-    Function store_selected_row that 
-    """
-    if request.method == "POST":
-        data = json.loads(request.body)
+# -------------------------- htmx partial endpoints --------------------------
+# These return small HTML fragments that htmx swaps into the page, replacing the
+# old client-side DOM building and the large json_script blobs.
+# ----------------------------------------------------------------------------
 
-        selected_row = data.get('selected_row', [])
-        current_header = data.get('current_header', [])
+def _row_payload(match):
+    """Flatten a raw match into display cells + a JSON string for the insert flow."""
+    cells = [c[0] if isinstance(c, list) and c else c for c in match]
+    return {"cells": cells, "json": json.dumps(cells)}
 
-        request.session['selected_row'] = selected_row
-        request.session['current_header'] = current_header
-        request.session['redirect_link'] = selected_row[2] # The 3rd element of every row is URI
 
-        return JsonResponse({
-            'status': 'ok',
-            'redirect_link': selected_row[2]
-            })
-    
-    if request.method == "GET":
-        redirect_link = request.session.get('redirect_link')
+def header_matches(request):
+    """Return the match table fragment for a single header (htmx GET)."""
+    header = request.GET.get('header', '').strip()
+    job_data = storage.get_recommender_data(request.session)
+    all_matches = job_data.get('all_matches', {})
+    best_match_index = job_data.get('best_match_index', {})
 
-        return JsonResponse({
-            'status': 'ok',
-            'redirect_link': redirect_link
+    if header not in all_matches:
+        return render(request, "converter/partials/match_table.html", {
+            "header": header,
+            "not_found": True,
         })
-    
-    return JsonResponse({"error": 'Invalid request'}, status=400)
+
+    matches = all_matches[header]
+    best_idx = best_match_index.get(header, 0)
+
+    return render(request, "converter/partials/match_table.html", {
+        "header": header,
+        "rows": [_row_payload(m) for m in matches],
+        "best_row": _row_payload(matches[best_idx]) if matches else None,
+        "columns": ["prefixedName", "vocabulary.prefix", "uri", "type", "score"],
+    })
+
+
+def vocab_ranking(request):
+    """Return the vocabulary ranking table fragment (htmx GET)."""
+    job_data = storage.get_recommender_data(request.session)
+    vocabulary_data = job_data.get('vocabulary_data', {})
+
+    # vocabulary_data maps vocab -> [avg_score, coverage, combi_score]
+    rows = [
+        {"vocab": vocab, "avg": values[0], "coverage": values[1], "combi": values[2]}
+        for vocab, values in vocabulary_data.items()
+    ]
+    rows.sort(key=lambda r: r["combi"], reverse=True)
+
+    return render(request, "converter/partials/vocab_table.html", {"rows": rows})
 
 
 def insert_match(request):
     """
-    This function inserts the selected match
+    Insert a single selected match into the metadata file (htmx POST).
+
+    Receives the row values and header directly in the request body, writes them
+    to the metadata JSON, and returns the refreshed JSON preview fragment so the
+    right-hand panel updates in place.
     """
-    
-    if request.method == "POST":
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request"}, status=400)
 
-        # Retrieve required data from the session
-        metadata_path = request.session.get('metadata_file_path', '')
-        row_data = request.session.get('selected_row', [])
-        header = request.session.get('current_header', '')
+    data = json.loads(request.body)
+    row = data.get("row", [])
+    header = data.get("header", "")
+    metadata_path = request.session.get("metadata_file_path", "")
 
+    if not (row and header and metadata_path):
+        return JsonResponse({"error": "Missing row, header or metadata path"}, status=400)
 
-        # Insert the match into metadata 
-        insert_instance(metadata_path, row_data, header)
+    insert_instance(metadata_path, row, header)
 
-        return redirect('convert_screen')
-    return JsonResponse({"error": 'Invalid request'}, status=400)
-        
+    content = ""
+    if os.path.exists(metadata_path):
+        with open(metadata_path, "r", encoding="utf-8") as json_file:
+            content = json_file.read()
+
+    return JsonResponse({"status": "success", "json": content})
+
 
 def save_file(request):
-    """
-    This function saves the file 
-    """
+    """Persist edited JSON from the preview textarea (htmx POST)."""
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request"}, status=400)
 
-    if request.method == "POST":
-        
-        # Get data from the form
-        json_text = request.POST.get('json_text', '')
-        metadata_path = request.session.get('metadata_file_path', '')
+    json_text = request.POST.get('json_text', '')
+    metadata_path = request.session.get('metadata_file_path', '')
 
+    try:
         data = json.loads(json_text)
+    except json.JSONDecodeError as e:
+        return JsonResponse({"status": "error", "message": f"Invalid JSON: {e}"}, status=400)
 
-        # Write to the file
-        if data:
-            with open(metadata_path, 'w', encoding='utf-8') as json_file:
-                json.dump(data, json_file, indent=2, ensure_ascii=False)
-
+    if data and metadata_path:
+        with open(metadata_path, 'w', encoding='utf-8') as json_file:
+            json.dump(data, json_file, indent=2, ensure_ascii=False)
         logger.info("Successfully saved the file")
 
+    return JsonResponse({"status": "success", "message": "Saved."})
 
-        return redirect('convert_screen')
+
+def download_nquads(request):
+    """Serve the generated N-Quads file as a download."""
+    csv_path = request.session.get('csv_path')
+    if not csv_path:
+        return JsonResponse({"status": "error", "message": "No file in session."}, status=400)
+
+    nquads_path = Path(f"{csv_path}.nq")
+    if not nquads_path.exists():
+        return JsonResponse({"status": "error", "message": "Convert the file first."}, status=404)
+
+    return FileResponse(
+        open(nquads_path, "rb"),
+        as_attachment=True,
+        filename=nquads_path.name,
+        content_type="application/n-quads",
+    )
 
 
 def submit_support(request):
-    """Handle support form submissions"""
+    """Handle support form submissions (htmx POST)."""
     if request.method == "POST":
         try:
             Support.objects.create(
@@ -296,8 +373,8 @@ def submit_support(request):
                 message=request.POST.get('message'),
                 contact=request.POST.get('contact') or None
             )
-            return render('convert_screen')
-        except Exception as e:
+            return JsonResponse({"status": "success", "message": "Thanks! Your request was submitted."})
+        except Exception:
             return JsonResponse({
                 "status": "error",
                 "message": "Sorry, there was an error submitting your request."
@@ -306,11 +383,51 @@ def submit_support(request):
 
 
 def process_priority_list(request):
-    """Process the priority list from vocabulary manager"""
+    """
+    Apply a user-defined vocabulary priority order to the cached recommender
+    results, rewrite the metadata, and return the refreshed JSON (POST).
+    """
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
 
-    if request.method == "POST":
+    try:
+        data = json.loads(request.body)
+        priority_list = data.get('priority_list', [])
+    except json.JSONDecodeError:
+        priority_list = []
 
-        priority_list = request.POST.get('priority_list')
-        logger.info(f"List: {priority_list}")
+    request.session['vocab_priority_list'] = priority_list
+    logger.info(f"Vocabulary priority list: {priority_list}")
 
-        return render('convert_screen')
+    job_data = storage.get_recommender_data(request.session)
+    all_matches = job_data.get('all_matches', {})
+    sorted_vocabs = job_data.get('sorted_vocabs', [])
+    headers = job_data.get('headers', [])
+    metadata_path = request.session.get('metadata_file_path', '')
+
+    if not all_matches or not metadata_path:
+        return JsonResponse(
+            {"status": "error", "message": "No dataset loaded to apply the priority to."},
+            status=400,
+        )
+
+    # Re-select the best match per header using the priority order, then persist.
+    best_match_index = rank_with_priority(all_matches, sorted_vocabs, priority_list, len(headers))
+    storage.save_recommender_data(request.session, {'best_match_index': best_match_index})
+
+    # Rewrite the metadata columns with the re-ranked best matches.
+    update_metadata(
+        metadata_path,
+        headers,
+        all_matches,
+        best_match_index,
+        'Homogenous',
+        request.session.get('custom_endpoint', ''),
+    )
+
+    content = ""
+    if os.path.exists(metadata_path):
+        with open(metadata_path, "r", encoding="utf-8") as json_file:
+            content = json_file.read()
+
+    return JsonResponse({"status": "success", "json": content, "priority_list": priority_list})

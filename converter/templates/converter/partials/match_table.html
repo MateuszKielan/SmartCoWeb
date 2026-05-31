@@ -1,0 +1,41 @@
+{% if not_found %}
+  <div class="match-empty">No matches found for "{{ header }}".</div>
+{% else %}
+  <div class="best-match-table">
+    <h2 class="he1">Best Match</h2>
+    <table class="match-table">
+      <thead>
+        <tr>{% for c in columns %}<th>{{ c }}</th>{% endfor %}</tr>
+      </thead>
+      <tbody>
+        {% if best_row %}
+          <tr class="match-row"
+              data-header="{{ header }}"
+              data-row="{{ best_row.json }}"
+              @click="openInsert($el.dataset)">
+            {% for cell in best_row.cells %}<td>{{ cell }}</td>{% endfor %}
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="all-match-table">
+    <h2 class="he1">All Matches</h2>
+    <table class="match-table">
+      <thead>
+        <tr>{% for c in columns %}<th>{{ c }}</th>{% endfor %}</tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+          <tr class="match-row"
+              data-header="{{ header }}"
+              data-row="{{ row.json }}"
+              @click="openInsert($el.dataset)">
+            {% for cell in row.cells %}<td>{{ cell }}</td>{% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}

@@ -1,9 +1,14 @@
 import logging
+from concurrent.futures import ThreadPoolExecutor
 from typing import List, Dict, Tuple
 
 from .requests_t import get_recommendations, organize_results, retrieve_combiSQORE_recursion, get_average_score, calculate_combi_score, get_vocabs
 
 logger = logging.getLogger(__name__)
+
+# Cap on concurrent outbound requests to the LOV API. Keeps us from hammering
+# the public endpoint while still collapsing N serial round-trips into a few.
+MAX_LOV_WORKERS = 8
 
 class Engine:
     def __init__(self, headers) -> None:
@@ -57,13 +62,25 @@ class Engine:
 
         """
 
-        for header in self.headers:
+        def fetch(header):
+            """Fetch and organise recommendations for a single header."""
             try:
                 recs = get_recommendations(header, match_limit)
-                self.all_results[header] = organize_results(recs)
+                return header, organize_results(recs)
             except Exception as e:
                 logger.warning(f"LOV error for header '{header}': {e}")
-                self.all_results[header] = []
+                return header, []
+
+        # Query the LOV API for every header concurrently. The results are
+        # reassembled in the original header order so downstream scoring is
+        # deterministic regardless of which request finishes first.
+        results_by_header = {}
+        workers = max(1, min(MAX_LOV_WORKERS, len(self.headers)))
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            for header, matches in executor.map(fetch, self.headers):
+                results_by_header[header] = matches
+
+        self.all_results = {header: results_by_header[header] for header in self.headers}
 
         # Get list of vocabularies
         self.vocabs = get_vocabs(self.all_results)

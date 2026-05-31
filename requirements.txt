@@ -1,0 +1,22 @@
+# Core framework
+Django==5.2.6
+
+# CSV-on-the-Web conversion engine (CSV -> metadata.json -> N-Quads)
+# NOTE: cow-csvw 2.0.0 hard-pins PyYAML==6.0, which has no wheel for Python 3.12+
+# and fails to build from source against Cython 3. On 3.12+ install PyYAML first:
+#     pip install "cython<3.0" wheel setuptools
+#     pip install --no-build-isolation "pyyaml==6.0"
+# (or `conda install "pyyaml=6.0"`) before running `pip install -r requirements.txt`.
+cow-csvw==2.0.0
+
+# Outbound HTTP to the LOV (Linked Open Vocabularies) API
+requests==2.32.3
+
+# Production static file serving (no separate web server / S3 needed)
+whitenoise==6.7.0
+
+# Read configuration from a .env file in development
+python-dotenv==1.0.1
+
+# WSGI server for production (Render / Cloud Run / Fly.io)
+gunicorn==23.0.0

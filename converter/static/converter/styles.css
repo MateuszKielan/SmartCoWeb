@@ -7,6 +7,40 @@ body, html {
     background-color: white;
 }
 
+/* --- Alpine.js visibility helpers ---------------------------------------- */
+/* Hide elements with x-cloak until Alpine initialises (prevents content flash) */
+[x-cloak] { display: none !important; }
+
+/* Alpine drives popups via an .is-open class because the base rules below set
+   display:none, which x-show cannot override. */
+.popup.is-open,
+.helper-popup.is-open,
+.match-container.is-open,
+.vocabulary-manager-helper-popup.is-open { display: block; }
+.insert-popup.is-open { display: flex; }
+
+/* Toast notification */
+.toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 4000;
+    padding: 14px 18px;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 14px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    max-width: 360px;
+}
+.toast.success { background-color: #2e7d32; }
+.toast.error   { background-color: #c62828; }
+.toast .toast-link {
+    color: #fff;
+    text-decoration: underline;
+    margin-left: 8px;
+    font-weight: 600;
+}
+
 /* Loader */
 
 .loader_page {
@@ -73,35 +107,61 @@ body, html {
     justify-content: center;
     align-items: center;
     height: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+    background: linear-gradient(135deg, #e8f0fe 0%, #f7f9fc 45%, #eef2f7 100%);
 }
 
-/* */
+/* Card holding the upload form */
 .form-box {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 20%;
-    height: 40%;
+    width: 100%;
+    max-width: 430px;
+    background: #ffffff;
+    padding: 44px 38px;
+    border-radius: 18px;
+    box-shadow: 0 18px 50px rgba(25, 118, 210, 0.14);
+    box-sizing: border-box;
 }
 
 /* Title */
 .welcome_title {
-    font-size: 34px;
-    margin-bottom: 30px;
+    font-size: 30px;
+    font-weight: 700;
+    margin: 0 0 8px;
     text-align: center;
     color: #1e1e1e;
+}
+
+/* Subtitle under the title */
+.welcome_subtitle {
+    font-size: 15px;
+    color: #6b7785;
+    text-align: center;
+    margin: 0 0 28px;
+    line-height: 1.5;
 }
 
 /* API input */
 .api-input {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 20px;
-    font-size: 18px;
-    border: none;
-    border-bottom: 1px solid #ccc;
-    color: #999;
-    text-align: center;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    font-size: 15px;
+    border: 1px solid #d6dde6;
+    border-radius: 9px;
+    color: #333;
+    text-align: left;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.api-input::placeholder { color: #9aa6b2; }
+.api-input:focus {
+    outline: none;
+    border-color: #2196F3;
+    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.15);
 }
 
 /* Hidden file input */
@@ -109,35 +169,57 @@ body, html {
     display: none;
 }
 
-/* Styled file button */
+/* Styled file button (dropzone-like, secondary) */
 .file-button {
-    background-color: #4A4A4A;
-    color: white;
-    padding: 10px;
+    background: #f4f8ff;
+    color: #1976D2;
+    padding: 16px;
     width: 100%;
     text-align: center;
     cursor: pointer;
-    margin-bottom: 10px;
-    font-size: 18px;
+    margin-bottom: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    border: 2px dashed #90caf9;
+    border-radius: 11px;
+    box-sizing: border-box;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+.file-button:hover {
+    background: #e9f2ff;
+    border-color: #2196F3;
 }
 
 /* File label */
 .file-label {
-    font-size: 15px;
-    color: #333;
-    margin-bottom: 15px;
+    font-size: 14px;
+    color: #667585;
+    margin-bottom: 24px;
+    text-align: center;
+    word-break: break-all;
 }
 
-/* Submit button */
+/* Submit button (primary) */
 .convert-button-start {
-    background-color: #4A4A4A;
+    background: linear-gradient(135deg, #1976D2 0%, #2196F3 100%);
     color: white;
-    padding: 10px;
+    padding: 14px;
     width: 100%;
     text-align: center;
     cursor: pointer;
-    margin-bottom: 10px;
-    font-size: 18px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 11px;
+    box-sizing: border-box;
+    box-shadow: 0 6px 18px rgba(25, 118, 210, 0.32);
+    transition: transform 0.1s ease, box-shadow 0.2s ease;
+}
+.convert-button-start:hover {
+    box-shadow: 0 9px 24px rgba(25, 118, 210, 0.42);
+}
+.convert-button-start:active {
+    transform: translateY(1px);
 }
 
 
@@ -276,6 +358,22 @@ body, html {
   padding-left: 45px;
 }
 
+.nav-button-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: #1976D2;
+}
+
+.nav-button-icon svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
 .nav-button-text {
   font-size: 15px;
 }
@@ -364,10 +462,33 @@ body, html {
   }
 
   .helper-button {
-    width: 2vw;
-    height: 2vw;
-    color: #ffff;
-    background-color: #8A8A8A;
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    padding: 0;
+    border: 2px solid #1976D2;
+    border-radius: 50%;
+    background: #fff;
+    color: #1976D2;
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  }
+
+  .helper-button:hover {
+    background: #1976D2;
+    border-color: #1976D2;
+    color: #fff;
+  }
+
+  .helper-button:active {
+    transform: scale(0.92);
   }
 
   /* Section with request type | replace all buttons */
@@ -826,9 +947,10 @@ body, html {
   border-bottom: 1px solid #ccc;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   padding: 0 8px;
   cursor: ns-resize;
+  position: relative;
 }
 
 .match-close {
@@ -836,6 +958,10 @@ body, html {
   border: 2px solid;
   font-size: 18px;
   cursor: pointer;
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .match-close:hover {
@@ -1242,4 +1368,312 @@ body, html {
 
 .submit-vocabulary-manager:hover {
   background-color: #1976D2;
+}
+/* ============================================================
+   METADATA EDITOR (JSON Preview panel: raw + structured views)
+   ============================================================ */
+
+/* Make the right panel a column so the editor area can fill it */
+.panel-right {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.json-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.json-panel-title {
+  font-size: 1.9rem;
+  font-weight: bold;
+  margin: 0;
+  color: #fff;
+}
+
+.json-view-toggle {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 9px;
+  padding: 3px;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.json-toggle-btn {
+  border: none;
+  background: transparent;
+  color: #fff;
+  padding: 7px 16px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.json-toggle-btn.active {
+  background: #fff;
+  color: #1976D2;
+}
+
+/* Container fills remaining height; override the old fixed calc() height */
+.json-preview-container {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.json-textarea {
+  min-height: 0;
+}
+
+/* Structured editor scroll area */
+.metadata-editor {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-right: 4px;
+}
+
+.editor-block {
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px 18px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.editor-block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.editor-block-title {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e1e1e;
+}
+
+.editor-block-head .editor-block-title {
+  margin-bottom: 0;
+}
+
+.editor-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 12px;
+}
+
+.editor-field:last-child {
+  margin-bottom: 0;
+}
+
+.editor-field > span {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7785;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.editor-field input,
+.editor-field select,
+.namespace-row input {
+  padding: 9px 11px;
+  border: 1px solid #d6dde6;
+  border-radius: 7px;
+  font-size: 14px;
+  color: #1e1e1e;
+  background: #fff;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.editor-field input:focus,
+.editor-field select:focus,
+.namespace-row input:focus {
+  outline: none;
+  border-color: #2196F3;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.15);
+}
+
+.editor-add-btn {
+  border: none;
+  background: #e9f2ff;
+  color: #1976D2;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.editor-add-btn:hover {
+  background: #d8e9ff;
+}
+
+.editor-empty {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: #9aa6b2;
+}
+
+.namespace-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  align-items: center;
+}
+
+.namespace-row .ns-prefix {
+  flex: 0 0 28%;
+}
+
+.namespace-row .ns-uri {
+  flex: 1;
+}
+
+.ns-delete {
+  border: none;
+  background: #fdecea;
+  color: #c62828;
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.ns-delete:hover {
+  background: #f9d9d6;
+}
+
+/* Column accordion cards */
+.column-card {
+  border: 1px solid #e3e8ee;
+  border-radius: 9px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.column-card:first-of-type {
+  margin-top: 4px;
+}
+
+.column-card-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  background: #f7f9fc;
+  padding: 11px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  text-align: left;
+}
+
+.column-card-head:hover {
+  background: #eef3f9;
+}
+
+.column-name {
+  font-weight: 700;
+  color: #1e1e1e;
+}
+
+.column-vocab {
+  flex: 1;
+  font-size: 12px;
+  color: #1976D2;
+  font-weight: 600;
+}
+
+.column-chevron {
+  color: #9aa6b2;
+  font-size: 12px;
+}
+
+.column-card-body {
+  padding: 14px;
+  border-top: 1px solid #e3e8ee;
+}
+
+/* Quick Search popup: header with helper button + centered actions */
+.helper-popup-header {
+  align-items: center;
+  gap: 10px;
+}
+
+.helper-popup-actions {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Reset the block/auto-margin centering when buttons sit in a flex row */
+.helper-popup-actions .search-button,
+.helper-popup-actions .close-button {
+  margin: 0;
+}
+
+/* Help overlay that must appear above another helper popup */
+.helper-popup--top {
+  z-index: 1004;
+}
+
+/* Tutorial popup: scrollable content + section styling */
+.helper-popup-content--scroll {
+  width: min(640px, 92vw);
+  max-height: 82vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.tutorial-body {
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.tutorial-intro {
+  color: #444;
+  font-size: 14px;
+}
+
+.tutorial-section {
+  margin: 18px 0 4px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1976D2;
+  border-top: 1px solid #eceff3;
+  padding-top: 12px;
+}
+
+.tutorial-body p {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Match window header: group the title with its help button */
+.match-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }

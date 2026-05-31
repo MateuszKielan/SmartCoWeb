@@ -1,115 +1,8 @@
-// REMINDER FOR MY FUTURE SELF:::
-// REWRITE THIS ABOMINATION OF A CODE
-// Thanks! (curent self)
-//---------------------------
+// Smart Cow Web — client behaviour.
+// UI state lives in the Alpine `smartcow()` component; server interactions use
+// htmx (match/vocabulary fragments) and small fetch() calls (convert/save/etc).
 
-let vocabularyManager = [];
-
-// Get input and label fields (guard if not present on this page)
-const fileInput = document.getElementById('csv_file')
-const fileLabelElement = document.querySelector('.file-label')
-
-if (fileInput && fileLabelElement) {
-    fileInput.addEventListener("change", () => {
-        fileLabelElement.textContent = fileInput.files[0].name;
-    })
-}
-
-function toggleSideBar(){
-    const navigationSideBar = document.getElementById('navigation-side-bar');
-    const overlay = document.getElementById('main-overlay');
-
-    navigationSideBar.classList.toggle('active');
-    overlay.classList.toggle('active');
-}
-
-const toggleMenuButton = document.getElementById('hamburger');
-
-if (toggleMenuButton) {
-    toggleMenuButton.addEventListener('click', () => {
-        toggleSideBar();
-    });
-} else {
-    console.warn('hamburger button not found');
-}
-
-window.addEventListener('click', (e) => {
-    const navigationSideBar = document.getElementById('navigation-side-bar');
-    const overlay = document.getElementById('main-overlay');
-    
-    if (!navigationSideBar || !overlay) return;
-
-    // If sidebar is open and click is outside sidebar and outside the hamburger button
-    const clickedOnHamburger = toggleMenuButton && toggleMenuButton.contains(e.target);
-    if (navigationSideBar.classList.contains('active') &&
-        !navigationSideBar.contains(e.target) &&
-        !clickedOnHamburger) {
-        navigationSideBar.classList.remove('active');
-        overlay.classList.remove('active');
-    }
-});
-
-function openMenuLink(link) {
-    const newTab = window.open('about:blank', '_blank');
-    newTab.location.href = link;
-}
-
-const aboutButton = document.getElementById('about-button');
-const documentationButton = document.getElementById('documentation-button');
-aboutButton.addEventListener('click', () => {
-    openMenuLink("https://github.com/MateuszKielan/BachelorThesis_CoW_Interface");
-});
-
-documentationButton.addEventListener('click', () => {
-    openMenuLink("https://mateuszkielan.github.io/BachelorThesis_CoW_Interface/")
-});
-
-// DON'T FORGET REMAKE TO OPEN HELPER POPUPS
-// Function to open the popup 
-function openDatasetForm() {
-    const popup = document.getElementById('dataset_popup');
-
-    popup.style.display = 'block';
-}
-
-// Function to close the popup 
-function closeDatasetForm() {
-    const popup = document.getElementById('dataset_popup');
-
-    popup.style.display = 'none';
-}
-
-// Helper popup open/close
-function openHelperPopup(element) {
-    const helper = document.getElementById(element);
-    helper.style.display = 'block';
-}
-
-function closeHelperPopup(element) {
-    const helper = document.getElementById(element);
-    helper.style.display = 'none';
-}
-
-
-function triggerNQuadsConversion() {
-    fetch('/convert/nquads/', {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': getCookie('csrftoken'),
-            'Content-Type': 'application/json'
-        },
-    })
-    .then(response => response.json())
-    .then(data => {
-        alert(data.message);  
-    })
-    .catch(error => {
-        console.error('Conversion error:', error);
-        alert("An error occurred during conversion.");
-    });
-}
-
-// Helper function to get CSRF token
+// ---- CSRF helpers ----------------------------------------------------------
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -125,489 +18,340 @@ function getCookie(name) {
     return cookieValue;
 }
 
-const matchTables = document.querySelectorAll('.match-table');
-
-matchTables.forEach(table => {
-    table.addEventListener('click', function(e) {
-
-        // Only handle clicks on table cells
-        // When row is clicked open a popup with the further action choice
-        if (e.target.tagName === 'TD') {
-            const insertPopup = document.getElementById('insert-popup');
-            insertPopup.style.display = 'flex';
-
-            const row = e.target.closest('tr'); 
-            // Collect all cell values in this row
-            const rowValues = Array.from(row.querySelectorAll('td')).map(td => td.textContent);
-            const currentHeader = document.getElementById('match-header-text').textContent;
-
-            console.log(currentHeader)
-
-            // Send the request to django so that it can be stored in the session
-            fetch('/store_selected_row/', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: JSON.stringify({ 
-                    selected_row: rowValues,
-                    current_header: currentHeader
-                 })
-            });
-        }
-    });
+// Attach the CSRF token to every htmx request automatically.
+document.body.addEventListener('htmx:configRequest', (event) => {
+    event.detail.headers['X-CSRFToken'] = getCookie('csrftoken');
 });
 
+// ---- Alpine component ------------------------------------------------------
+function smartcow() {
+    return {
+        // UI state
+        sidebarOpen: false,
+        activePopup: null,      // 'requestType' | 'vocabRecommender' | 'navSearch' | 'support' | 'vocabManager'
+        showDataset: false,
+        showMatches: false,
+        showInsert: false,
+        searchHelp: false,          // help overlay for the Quick Search popup
+        scoresHelp: false,          // help overlay explaining the match/vocab scores
+        matchTitle: 'Matches',
+        searchValue: '',
+        colorBlind: false,
+        toast: { show: false, message: '', type: 'success', downloadUrl: null },
 
-function create_vocabulary_table(vocabularyData) {
-    const listOfTitles = ['Vocabulary', 'Average Match Score', ' Nr of Produced Matches', 'Combi Score'];
+        // Vocabulary manager
+        vocabInput: '',
+        vocabList: [],
 
-    const popup = document.getElementById('matchContainer');
-    const title = document.getElementById('match-header-text');
-    const table = document.getElementById('match-table');
+        // Currently selected match row for the insert popup
+        insert: { row: [], header: '' },
 
-    // Create the table headers
-    const thead = document.createElement('thead');
-    const tbody = document.createElement('tbody');
-    const headerRow = document.createElement('tr');
+        // Match-window resizing
+        _resize: { active: false, startY: 0, startHeight: 0 },
 
-    const bestMatchTable = document.getElementById('best-match-table');
-    const matchHeaderText = document.getElementById('match-header-text');
+        // --- JSON / metadata editor state ---
+        jsonView: 'structured',     // 'raw' | 'structured'
+        jsonText: '',               // single source of truth for the metadata JSON
+        meta: {},                   // parsed metadata object (structured mode)
+        settingsObj: {},            // @context entry holding @base / @language
+        nsObj: null,                // @context entry holding the namespaces
+        namespaces: [],             // [{ prefix, uri }] editable view of nsObj
+        publisher: {},              // reference to meta['dc:publisher']
+        license: {},                // reference to meta['dc:license'] ({ '@id': ... })
+        tableSchema: {},            // reference to meta.tableSchema
+        columns: [],                // reference to meta.tableSchema.columns
+        openColumns: [],            // indices of expanded column cards
 
-    matchHeaderText.textContent = 'Vocabulary ranking';
-    bestMatchTable.style.display = 'None';
+        init() {
+            try {
+                this.colorBlind = localStorage.getItem('colorBlindMode') === '1';
+            } catch (e) { /* ignore */ }
+            document.documentElement.classList.toggle('color-blind', this.colorBlind);
 
-    table.innerHTML = "";
+            // Seed the editor from the server-rendered textarea.
+            const el = document.getElementById('jsonPreview');
+            if (el) this.jsonText = el.value;
 
-    listOfTitles.forEach(title => {
-
-        const th = document.createElement('th');
-        th.textContent = title;
-        headerRow.appendChild(th);
-
-    })
-    
-    thead.append(headerRow);
-    table.append(thead);
-
-    for(const [key, value] of Object.entries(vocabularyData)) {
-        const bodyRow = document.createElement('tr'); 
-        const data = [key, value[0], value[1], value[2]];
-
-        for (let i = 0; i < data.length; i++) {
-            const bodyEntry = document.createElement('td');
-
-            bodyEntry.textContent = data[i];
-            bodyRow.appendChild(bodyEntry);
-        }
-        tbody.appendChild(bodyRow);
-    }
-    table.appendChild(tbody);
-
-    console.log(vocabularyData);
-
-    popup.style.display = 'block';
-};
-
-
-function create_match_tables(header) {
-    const headers = JSON.parse(document.getElementById('headers').textContent);
-
-    // Exit if wrong input
-    if (!headers.includes(header)){
-        return;
-    }
-
-    // Retrieve DOM elements
-    const popup = document.getElementById('matchContainer');
-    const title = document.getElementById('match-header-text');
-    const table = document.getElementById('match-table');
-    const bestMatchTable = document.getElementById('best-match-table-element');
-
-    // Create the table headers
-    const thead = document.createElement('thead');
-    const tbody = document.createElement('tbody');
-    const headerRow = document.createElement('tr');
-
-    // Create the best match table headers
-    const tBestHead = document.createElement('thead');
-    const tBestBody = document.createElement('tbody');
-    const headerBestRow = document.createElement('tr');
-
-    // Retrieve data
-    const allMatches = JSON.parse(document.getElementById('all-matches-data').textContent);
-    const bestMatchIndexes = JSON.parse(document.getElementById('best-match-index-data').textContent);
-    const listOfTitles = ['prefixedName', 'vocabualry.prefix', 'uri', 'type', 'score'];
-
-    table.innerHTML = "";
-    bestMatchTable.innerHTML = "";
-
-     // If the first vocab card was pressed
-     if (header == "Vocabularies") {
-        // HERE CALL THE FUNCTION to build vocabulary table 
-        console.log(vocabCoverageScore);
-        console.log(sortedVocabs);
-
-        return;
-    }
-
-
-    // create the headers of the table 
-    listOfTitles.forEach(title => {
-        const th = document.createElement('th');
-        const th2 = document.createElement('th');
-
-        th.textContent = title;
-        th2.textContent = title;
-
-        headerRow.appendChild(th);
-        headerBestRow.appendChild(th2);
-    })
-    
-    thead.append(headerRow);
-    table.append(thead);
-    
-    tBestHead.append(headerBestRow);
-    bestMatchTable.append(tBestHead);
-
-    // Populate the best match table 
-    const bestBodyRow = document.createElement('tr');
-    const bestMatchElement = allMatches[header][bestMatchIndexes[header]];
-
-    for (let j =0; j < allMatches[header][0].length; j++) {
-        const bestTd = document.createElement('td');
-
-        if (bestMatchElement[j] instanceof Array) {
-            bestTd.textContent = bestMatchElement[j][0];
-        } else {
-            bestTd.textContent = bestMatchElement[j];
-        }
-        bestBodyRow.appendChild(bestTd);
-    }
-    tBestBody.appendChild(bestBodyRow);
-    bestMatchTable.appendChild(tBestBody);
-
-    // Populate all match table
-    allMatches[header].forEach(match => {
-
-        const bodyRow = document.createElement('tr');   
-
-        for (let i =0; i < match.length; i++) {
-            const td = document.createElement('td');
-            // Strip the array to string
-            if (match[i] instanceof Array) {
-                td.textContent = match[i][0];
-            } else {
-                td.textContent = match[i];
+            // Default view is the structured editor; parse now (fall back to raw
+            // if the metadata isn't valid JSON).
+            if (this.jsonView === 'structured' && !this.parseMeta(true)) {
+                this.jsonView = 'raw';
             }
-            bodyRow.appendChild(td);
-        }
-        tbody.appendChild(bodyRow);
-
-    });
-
-    table.appendChild(tbody);
-
-    title.textContent = header
-
-    popup.style.display = 'block';
-}
-
-const cardVocabButton = document.getElementById('vocab-card-button');
-const cardButtons = document.querySelectorAll('#card-button');
-
-// This creates a table dynamically when clicked on the corresponding header card 
-cardButtons.forEach(button => {
-    button.addEventListener('click', function() {
-        
-        const header = this.dataset.header;
-        create_match_tables(header);
-
-    });
-});
-
-cardVocabButton.addEventListener('click', function() {
-    const vocabCoverageScore = JSON.parse(document.getElementById('vocab-coverage-score-data').textContent);
-    const sortedVocabs = JSON.parse(document.getElementById('sorted-vocabs-data').textContent);
-    const vocabularyData = JSON.parse(document.getElementById('vocabulary-data').textContent);
-
-    create_vocabulary_table(vocabularyData);
-});
-
-const searchButton = document.getElementById('search-button');
-// This create a table dynamically when using the search bar
-searchButton.addEventListener('click', function(){
-    const header_search = document.getElementById('header-search').value;
-    create_match_tables(header_search);
-});
-
-// Nav search. open popup, focus input and run same create_match_tables functions
-const navSearchButton = document.getElementById('nav-search-button');
-const navSearchSubmit = document.getElementById('nav-search-submit');
-
-if (navSearchButton) {
-    navSearchButton.addEventListener('click', () => {
-        openHelperPopup('nav-search-helper');
-        setTimeout(() => {
-            const inp = document.getElementById('nav-header-search');
-            if (inp) inp.focus();
-        }, 50);
-    });
-}
-
-if (navSearchSubmit) {
-    navSearchSubmit.addEventListener('click', () => {
-        const val = document.getElementById('nav-header-search').value;
-        closeHelperPopup('nav-search-helper');
-        create_match_tables(val);
-    });
-}
-
-
-const sourceButton = document.getElementById('source-btn');
-
-// MAYBE ADD THIS in a Function when the row was clicked ?
-sourceButton.addEventListener('click', ()=> {
-    // Initialize the new tab here
-    const newTab = window.open('about:blank', '_blank');
-
-    fetch('/store_selected_row/')  // URL of the Django view
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'ok' && data.redirect_link) {
-            console.log(data.redirect_link)
-            newTab.location.href = data.redirect_link 
-        } else {
-            console.error('Redirect link not found');
-        }
-    });
-});
-
-
-function loadingScreen() {
-    const convert_btn  = document.getElementById("convert-button-start");
-    const loader = document.getElementById("loader_page");
-
-    if (convert_btn && loader){
-        loader.style.display = 'flex';    
-    }
-}
-
-
-const container = document.getElementById('matchContainer');
-const resizer = document.getElementById('matchResizer');
-
-let startY, startHeight, isResizing = false;
-
-if (resizer) {
-    resizer.addEventListener('mousedown', e => {
-    isResizing = true;
-    startY = e.clientY;
-    startHeight = container.offsetHeight;
-    document.addEventListener('mousemove', resize);
-    document.addEventListener('mouseup', stopResize);
-    });
-}
-
-
-function resize(e) {
-  if (!isResizing) return;
-  const dy = startY - e.clientY;
-  container.style.height = `${startHeight + dy}px`;
-}
-
-function stopResize() {
-  isResizing = false;
-  document.removeEventListener('mousemove', resize);
-  document.removeEventListener('mouseup', stopResize);
-}
-
-// Color-blind toggle button logic 
-const colorBlindButton = document.getElementById('colorblind-button');
-
-function setColorBlindMode(enabled) {
-    document.documentElement.classList.toggle('color-blind', enabled);
-    if (colorBlindButton) {
-        colorBlindButton.classList.toggle('active', enabled);
-        colorBlindButton.setAttribute('aria-pressed', enabled ? 'true' : 'false');
-    }
-    try {
-        localStorage.setItem('colorBlindMode', enabled ? '1' : '0');
-    } catch (e){}
-}
-
-if (colorBlindButton) {
-    colorBlindButton.addEventListener('click', () => {
-        const enabled = !document.documentElement.classList.contains('color-blind');
-        setColorBlindMode(enabled);
-    });
-}
-
-// Apply saved preference on load
-try {
-    if (localStorage.getItem('colorBlindMode') === '1') {
-        setColorBlindMode(true);
-    }
-} catch (e){}
-
-// Support form handling
-const supportButton = document.getElementById('support-button');
-if (supportButton) {
-    supportButton.addEventListener('click', () => {
-        openHelperPopup('support-form-popup');
-    });
-}
-
-
-// THIS IS THE SECTION FOR VOCABULARY MANGER (!Restructure this later to be in a proper chronological place!)
-const vocabManagerButton = document.getElementById('nav-vocabulary-manager-button');
-
-if (vocabManagerButton)  {
-    vocabManagerButton.addEventListener('click', () => {
-        openHelperPopup('vocabulary-manager-helper-popup');
-    });
-}
-
-// Render Vocabulary Manager
-// Add Vocabulary
-function renderVocabularyManager() {
-    const popup = document.getElementById('vocabulary-manager-helper-popup');
-
-    let listContainer = document.getElementById('vocabulary-manager-list');
-
-    if (!listContainer) {
-        listContainer = document.createElement('div');
-        listContainer.id = 'vocabulary-manager-list';
-        listContainer.className = 'vocabulary-manager-list';
-        const body = popup.querySelector('.vocabulary-manager-helper-popup-body');
-        if (body) body.appendChild(listContainer);
-    }
-
-    listContainer.innerHTML = '';
-
-    if (vocabularyManager.length === 0) {
-        const empty = document.createElement('p');
-        empty.textContent = 'No vocabularies added.';
-        empty.className = 'vocab-empty';
-        listContainer.appendChild(empty);
-        return;
-    }
-
-    vocabularyManager.forEach((name, idx) => {
-        const card = document.createElement('div');
-        card.className = 'vocabulary-card';
-
-        const left = document.createElement('div');
-        left.className = 'vocab-left';
-
-        const right = document.createElement('div');
-        right.className = "vocab-right";
-
-        const pri = document.createElement('div');
-        pri.className = 'vocab-priority';
-        pri.textContent = (idx + 1);
-
-        const nm = document.createElement('div');
-        nm.className = 'vocab-name';
-        nm.textContent = name;
-
-        const del = document.createElement('button');
-        del.className = 'vocab-delete';
-        del.textContent = 'X';
-
-        const up = document.createElement('button');
-        up.className = 'vocab-up';
-        up.textContent = '↑';
-
-        const down = document.createElement('button');
-        down.className = 'vocab-down';
-        down.textContent = '↓';
-        
-        del.addEventListener('click', () => {
-            removeVocabulary(idx);
-        });
-
-        up.addEventListener('click', () => {
-            rearangeVocabulary(idx, 1);
-        });
-        
-        down.addEventListener('click', () => {
-            rearangeVocabulary(idx, -1);
-        });
-
-        left.appendChild(pri);
-        left.appendChild(nm);
-
-        card.appendChild(left);
-        card.appendChild(right);
-
-        right.appendChild(up);
-        right.appendChild(down);
-        right.appendChild(del);
-
-        listContainer.appendChild(card);
-    });
-}
-
-// Add Vocabulary 
-// Adds vocabualry to the 
-function addVocabulary() {
-    const vocabName = document.getElementById('input-vocabulary-manager').value;
-
-    // If nothing entered
-    if (!vocabName) return;
-
-    // Check for duplicates
-    if (vocabularyManager.includes(vocabName)) {
-        vocabName.value = '';
-        return;
-    }
-
-    vocabularyManager.push(vocabName);
-    vocabName.value = '';
-    
-    renderVocabularyManager();
-}
-
-// Removes the vocabualry form the list and refreshes the list. 
-function removeVocabulary(index) {
-    vocabularyManager.splice(index, 1);
-
-    // Render Vocabulary Manager
-    renderVocabularyManager();
-}
-
-// Rearange Vocabulary
-// Moves the vocabualry up or down in the priority list based on user input.
-function rearangeVocabulary(index, move) {
-
-    if (vocabularyManager.length <= 1) return;
-
-    if (move == 1) {
-        [vocabularyManager[index], vocabularyManager[index - 1]] = [vocabularyManager[index - 1], vocabularyManager[index]];
-        renderVocabularyManager();
-    } else {
-        [vocabularyManager[index], vocabularyManager[index + 1]] = [vocabularyManager[index + 1], vocabularyManager[index]];
-        renderVocabularyManager();
-    };
-}
-
-
-// Submit Vocabulary Manager
-function submitPriorityList() {
-
-    if(!vocabularyManager) return;
-
-    fetch('/vocabulary_manager/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
         },
-        body: JSON.stringify({ 
-            priority_list: vocabularyManager
-        })
-    });
 
+        // --- generic helpers ---
+        openPopup(name) { this.activePopup = name; },
+
+        closeAll() {
+            this.activePopup = null;
+            this.showMatches = false;
+            this.showInsert = false;
+            this.showDataset = false;
+            this.searchHelp = false;
+            this.scoresHelp = false;
+            this.sidebarOpen = false;
+        },
+
+        openLink(url) { window.open(url, '_blank'); },
+
+        toggleColorBlind() {
+            this.colorBlind = !this.colorBlind;
+            document.documentElement.classList.toggle('color-blind', this.colorBlind);
+            try { localStorage.setItem('colorBlindMode', this.colorBlind ? '1' : '0'); } catch (e) {}
+        },
+
+        toastMsg(message, type = 'success', downloadUrl = null) {
+            this.toast = { show: true, message, type, downloadUrl };
+            clearTimeout(this._toastTimer);
+            this._toastTimer = setTimeout(() => { this.toast.show = false; }, downloadUrl ? 10000 : 4000);
+        },
+
+        // --- match / vocabulary loading (htmx) ---
+        loadMatches(header) {
+            if (!header) return;
+            this.matchTitle = header;
+            this.showMatches = true;
+            htmx.ajax('GET', `/matches/?header=${encodeURIComponent(header)}`,
+                      { target: '#match-content', swap: 'innerHTML' });
+        },
+
+        loadVocabRanking() {
+            this.matchTitle = 'Vocabulary ranking';
+            this.showMatches = true;
+            htmx.ajax('GET', '/vocab_ranking/',
+                      { target: '#match-content', swap: 'innerHTML' });
+        },
+
+        // --- insert flow ---
+        openInsert(dataset) {
+            this.insert = { row: JSON.parse(dataset.row), header: dataset.header };
+            this.showInsert = true;
+        },
+
+        openSource() {
+            const uri = this.insert.row[2];
+            if (uri) window.open(uri, '_blank');
+        },
+
+        doInsert() {
+            fetch('/insert_match', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                body: JSON.stringify({ row: this.insert.row, header: this.insert.header }),
+            })
+                .then((r) => r.json())
+                .then((data) => {
+                    if (data.status === 'success') {
+                        this.jsonText = data.json;
+                        if (this.jsonView === 'structured') this.parseMeta();
+                        this.toastMsg(`Inserted match for "${this.insert.header}".`);
+                    } else {
+                        this.toastMsg(data.message || 'Failed to insert match.', 'error');
+                    }
+                    this.showInsert = false;
+                })
+                .catch(() => this.toastMsg('Failed to insert match.', 'error'));
+        },
+
+        // --- conversion / save ---
+        convert() {
+            this.toastMsg('Converting to N-Quads…', 'success');
+            fetch('/convert/nquads/', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' },
+            })
+                .then((r) => r.json())
+                .then((data) => {
+                    if (data.status === 'success') {
+                        this.toastMsg(data.message, 'success', data.download_url);
+                    } else {
+                        this.toastMsg(data.message || 'Conversion failed.', 'error');
+                    }
+                })
+                .catch(() => this.toastMsg('An error occurred during conversion.', 'error'));
+        },
+
+        saveFile() {
+            // In structured mode, serialise the editor back into jsonText first.
+            if (this.jsonView === 'structured' && !this.buildJson()) return;
+
+            const formData = new FormData();
+            formData.append('json_text', this.jsonText);
+            fetch('/save_file', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                body: formData,
+            })
+                .then((r) => r.json())
+                .then((data) => this.toastMsg(data.message, data.status === 'success' ? 'success' : 'error'))
+                .catch(() => this.toastMsg('Failed to save the file.', 'error'));
+        },
+
+        // --- metadata editor (structured view) ---
+        setJsonView(view) {
+            if (view === this.jsonView) return;
+            if (view === 'structured') {
+                if (!this.parseMeta()) return;   // stay on raw if JSON is invalid
+            } else {
+                this.buildJson();                // sync edits back into the textarea
+            }
+            this.jsonView = view;
+        },
+
+        parseMeta(silent = false) {
+            try {
+                this.meta = JSON.parse(this.jsonText);
+            } catch (e) {
+                if (!silent) this.toastMsg('Cannot open editor: the JSON is invalid.', 'error');
+                return false;
+            }
+
+            // Normalise @context into an array we can edit.
+            let ctx = this.meta['@context'];
+            if (!Array.isArray(ctx)) ctx = ctx ? [ctx] : [];
+            this.meta['@context'] = ctx;
+
+            // The entry carrying @base / @language.
+            this.settingsObj = ctx.find(
+                (e) => e && typeof e === 'object' && ('@base' in e || '@language' in e)
+            );
+            if (!this.settingsObj) {
+                this.settingsObj = { '@base': '', '@language': '' };
+                ctx.push(this.settingsObj);
+            }
+
+            // The entry holding the prefix -> URI namespaces.
+            this.nsObj = ctx.find(
+                (e) => e && typeof e === 'object' && e !== this.settingsObj &&
+                       Object.keys(e).some((k) => !k.startsWith('@'))
+            );
+            this.namespaces = this.nsObj
+                ? Object.entries(this.nsObj).map(([prefix, uri]) => ({ prefix, uri }))
+                : [];
+
+            // Dataset descriptors. Ensure the parent objects exist so the editor
+            // can bind to their sub-keys.
+            this.publisher = (this.meta['dc:publisher'] && typeof this.meta['dc:publisher'] === 'object')
+                ? this.meta['dc:publisher']
+                : (this.meta['dc:publisher'] = {});
+            const lic = this.meta['dc:license'];
+            this.license = (lic && typeof lic === 'object')
+                ? lic
+                : (this.meta['dc:license'] = { '@id': typeof lic === 'string' ? lic : '' });
+
+            // References into meta (edits flow straight through).
+            this.tableSchema = this.meta.tableSchema || (this.meta.tableSchema = {});
+            this.columns = this.tableSchema.columns || (this.tableSchema.columns = []);
+            this.openColumns = [];
+            return true;
+        },
+
+        buildJson() {
+            try {
+                // Rebuild the namespaces object in place from the editable list.
+                if (this.nsObj) {
+                    Object.keys(this.nsObj).forEach((k) => delete this.nsObj[k]);
+                    this.namespaces.forEach(({ prefix, uri }) => {
+                        if (prefix) this.nsObj[prefix] = uri;
+                    });
+                } else if (this.namespaces.length) {
+                    const obj = {};
+                    this.namespaces.forEach(({ prefix, uri }) => { if (prefix) obj[prefix] = uri; });
+                    this.meta['@context'].push(obj);
+                    this.nsObj = obj;
+                }
+                this.jsonText = JSON.stringify(this.meta, null, 4);
+                return true;
+            } catch (e) {
+                this.toastMsg('Could not serialise the metadata.', 'error');
+                return false;
+            }
+        },
+
+        addNamespace() { this.namespaces.push({ prefix: '', uri: '' }); },
+        removeNamespace(i) { this.namespaces.splice(i, 1); },
+
+        toggleColumn(i) {
+            const at = this.openColumns.indexOf(i);
+            if (at === -1) this.openColumns.push(i);
+            else this.openColumns.splice(at, 1);
+        },
+        isColumnOpen(i) { return this.openColumns.includes(i); },
+
+        // --- support form ---
+        submitSupport(event) {
+            const formData = new FormData(event.target);
+            fetch('/submit-support/', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                body: formData,
+            })
+                .then((r) => r.json())
+                .then((data) => {
+                    this.toastMsg(data.message, data.status === 'success' ? 'success' : 'error');
+                    if (data.status === 'success') {
+                        event.target.reset();
+                        this.activePopup = null;
+                    }
+                })
+                .catch(() => this.toastMsg('Failed to submit the request.', 'error'));
+        },
+
+        // --- vocabulary manager ---
+        addVocabulary() {
+            const name = this.vocabInput.trim();
+            if (!name || this.vocabList.includes(name)) { this.vocabInput = ''; return; }
+            this.vocabList.push(name);
+            this.vocabInput = '';
+        },
+
+        removeVocabulary(idx) { this.vocabList.splice(idx, 1); },
+
+        moveVocabulary(idx, dir) {
+            const target = idx + dir;
+            if (target < 0 || target >= this.vocabList.length) return;
+            [this.vocabList[idx], this.vocabList[target]] = [this.vocabList[target], this.vocabList[idx]];
+        },
+
+        submitPriorityList() {
+            fetch('/vocabulary_manager/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                body: JSON.stringify({ priority_list: this.vocabList }),
+            })
+                .then((r) => r.json())
+                .then((data) => {
+                    if (data.status === 'success') {
+                        this.jsonText = data.json;
+                        if (this.jsonView === 'structured') this.parseMeta();
+                        this.toastMsg('Priority applied to the recommendations.');
+                        this.activePopup = null;
+                    } else {
+                        this.toastMsg(data.message || 'Failed to apply the priority list.', 'error');
+                    }
+                })
+                .catch(() => this.toastMsg('Failed to submit the priority list.', 'error'));
+        },
+
+        // --- resizable match window ---
+        startResize(event) {
+            this._resize = {
+                active: true,
+                startY: event.clientY,
+                startHeight: this.$refs.matchContainer.offsetHeight,
+            };
+            const onMove = (e) => {
+                if (!this._resize.active) return;
+                const dy = this._resize.startY - e.clientY;
+                this.$refs.matchContainer.style.height = `${this._resize.startHeight + dy}px`;
+            };
+            const onUp = () => {
+                this._resize.active = false;
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp);
+            };
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+        },
+    };
 }

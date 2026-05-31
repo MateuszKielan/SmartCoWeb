@@ -44,7 +44,9 @@
             "ulan": "http://vocab.getty.edu/ulan/",
             "wgs84": "http://www.w3.org/2003/01/geo/wgs84_pos#",
             "xml": "http://www.w3.org/XML/1998/namespace/",
-            "xsd": "http://www.w3.org/2001/XMLSchema#"
+            "xsd": "http://www.w3.org/2001/XMLSchema#",
+            "dicom": "http://purl.org/healthcarevocab/v1#",
+            "dbpedia-owl": "http://dbpedia.org/ontology/"
         }
     ],
     "tableSchema": {
@@ -59,27 +61,27 @@
                 "propertyUrl": "http://purl.org/healthcarevocab/v1#PersonIdentificationCodeSequence",
                 "vocab": "dicom",
                 "type": "property",
-                "score": 0.40903586
+                "score": 0.39586353
             },
             {
                 "name": "surname",
                 "datatype": "string",
-                "@id": "http://dbpedia.org/ontology/Surname",
-                "prefixedName": "dbpedia-owl:Surname",
-                "propertyUrl": "http://dbpedia.org/ontology/Surname",
-                "vocab": "dbpedia-owl",
-                "type": "class",
-                "score": 0.5242454
+                "@id": "http://xmlns.com/foaf/0.1/surname",
+                "prefixedName": "foaf:surname",
+                "propertyUrl": "http://xmlns.com/foaf/0.1/surname",
+                "vocab": "foaf",
+                "type": "property",
+                "score": 0.8021677
             },
             {
                 "name": "male",
                 "datatype": "string",
-                "@id": "http://dbpedia.org/ontology/championInSingleMale",
-                "prefixedName": "dbpedia-owl:championInSingleMale",
-                "propertyUrl": "http://dbpedia.org/ontology/championInSingleMale",
-                "vocab": "dbpedia-owl",
+                "@id": "http://xmlns.com/foaf/0.1/gender",
+                "prefixedName": "foaf:gender",
+                "propertyUrl": "http://xmlns.com/foaf/0.1/gender",
+                "vocab": "foaf",
                 "type": "property",
-                "score": 0.20234768
+                "score": 0.4966176
             },
             {
                 "name": "occupation",
@@ -89,13 +91,13 @@
                 "propertyUrl": "http://dbpedia.org/ontology/occupation",
                 "vocab": "dbpedia-owl",
                 "type": "property",
-                "score": 0.60405463
+                "score": 0.61059177
             }
         ]
     },
     "url": "cow_person_example.csv",
     "dialect": {
-        "delimiter": ",",
+        "delimiter": ";",
         "encoding": "ascii",
         "quoteChar": "\""
     },

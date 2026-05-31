@@ -1,0 +1,27 @@
+# Render Blueprint: provisions the Smart Cow web service.
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: smartcow
+    runtime: python
+    plan: free
+    region: frankfurt          
+    buildCommand: "./build.sh"
+    # Single worker so the in-process recommender cache (LocMemCache) is shared;
+    # threads handle concurrent requests and the slow LOV lookups.
+    startCommand: "gunicorn config.wsgi --workers 1 --threads 4 --timeout 120"
+    envVars:
+      - key: DJANGO_SECRET_KEY
+        generateValue: true     
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      # Render injects RENDER_EXTERNAL_HOSTNAME; mirror it into settings.
+      - key: DJANGO_ALLOWED_HOSTS
+        fromService:
+          type: web
+          name: smartcow
+          property: host
+      - key: DJANGO_CSRF_TRUSTED_ORIGINS
+        sync: false             # set to https://<your-app>.onrender.com after first deploy

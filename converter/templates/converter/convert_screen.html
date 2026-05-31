@@ -3,14 +3,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Smart Cow</title>
   <link rel="stylesheet" href="{% static 'converter/styles.css' %}">
   <link rel="icon" href="{% static 'converter/cow.ico' %}" type="image/x-icon">
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js"></script>
 </head>
-<body>
+<body x-data="smartcow()" @keydown.escape="closeAll()">
   <!-- Header Bar -->
   <div class="header">
-      <button class="hamburger" id="hamburger">
+      <button class="hamburger" id="hamburger" @click="sidebarOpen = !sidebarOpen">
           <span></span>
           <span></span>
           <span></span>
@@ -19,7 +22,7 @@
   </div>
 
   <!-- Navigation Bar -->
-  <div class="navigation-side-bar" id="navigation-side-bar">
+  <div class="navigation-side-bar" id="navigation-side-bar" :class="{ active: sidebarOpen }">
     <div class="menu-title-element">
       <p class="menu-title-text"> Navigation </p>
     </div>
@@ -28,18 +31,18 @@
       <div class="menu-section-container">
         <p class="menu-section-title">DATA</p>
 
-        <button class="menu-section-element" onclick="window.location.href='{% url 'welcome' %}'">
-            <span class="nav-button-icon">📁</span>
+        <button class="menu-section-element" @click="window.location.href='{% url 'welcome' %}'">
+            <span class="nav-button-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg></span>
             <span class="nav-button-text">Load Dataset</span>
         </button>
 
-        <button class="menu-section-element"  onclick="triggerNQuadsConversion()">
-          <span class="nav-button-icon"> 💾</span> 
+        <button class="menu-section-element" @click="convert()">
+          <span class="nav-button-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
           <span class="nav-button-text">Export Data</span>
         </button>
 
-        <button class="menu-section-element" id="nav-vocabulary-manager-button">
-          <span class="nav-button-icon">📝</span> 
+        <button class="menu-section-element" @click="openPopup('vocabManager')">
+          <span class="nav-button-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span>
           <span class="nav-button-text">Vocabulary Manager</span>
         </button>
 
@@ -49,18 +52,19 @@
       <div class="menu-section-container">
         <p class="menu-section-title">TOOLS</p>
 
-        <button class="menu-section-element">
-          <span class="nav-button-icon">⚙️</span> 
+        <button class="menu-section-element" @click="openPopup('configureEndpoint')">
+          <span class="nav-button-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" y1="4" x2="14" y2="4"/><line x1="10" y1="4" x2="3" y2="4"/><line x1="21" y1="12" x2="12" y2="12"/><line x1="8" y1="12" x2="3" y2="12"/><line x1="21" y1="20" x2="16" y2="20"/><line x1="12" y1="20" x2="3" y2="20"/><line x1="14" y1="2" x2="14" y2="6"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="16" y1="18" x2="16" y2="22"/></svg></span>
           <span class="nav-button-text">Configure Endpoint</span>
         </button>
 
-        <button class="menu-section-element" id="nav-search-button">
-          <span class="nav-button-icon">🔍</span>
+        <button class="menu-section-element" @click="openPopup('navSearch')">
+          <span class="nav-button-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
           <span class="nav-button-text">Search</span>
         </button>
 
-        <button class="menu-section-element" id="colorblind-button" aria-pressed="false">
-          <span class="nav-button-icon">👁️</span> 
+        <button class="menu-section-element" :class="{ active: colorBlind }"
+                :aria-pressed="colorBlind ? 'true' : 'false'" @click="toggleColorBlind()">
+          <span class="nav-button-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></span>
           <span class="nav-button-text">Color Blind mode</span>
         </button>
 
@@ -70,18 +74,31 @@
       <div class="menu-section-container">
         <p class="menu-section-title">HELP</p>
 
-        <button class="menu-section-element" id="documentation-button">
-            <span class="nav-button-icon">📚</span> 
+        <button class="menu-section-element" @click="openPopup('tutorial')">
+          <span class="nav-button-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6"/><path d="M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1 2 3 6 3s6-2 6-3v-5"/></svg></span>
+          <span class="nav-button-text">Tutorial</span>
+        </button>
+
+        <button class="menu-section-element"
+                @click="openLink('https://mateuszkielan.github.io/BachelorThesis_CoW_Interface/')">
+            <span class="nav-button-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg></span>
             <span class="nav-button-text"> Documentation (Dev)</span>
         </button>
 
-        <button class="menu-section-element" id="support-button">
-          <span class="nav-button-icon">💬</span> 
+        <button class="menu-section-element" @click="openPopup('support')">
+          <span class="nav-button-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg></span>
           <span class="nav-button-text">Support</span>
         </button>
 
-        <button class="menu-section-element" id="about-button">
-          <span class="nav-button-icon">ℹ️</span> 
+        <button class="menu-section-element"
+                @click="openLink('https://docs.google.com/forms/d/e/1FAIpQLScp03odTmpw0oGNvry2xHySH3qzq-_qql3ib9sd9aPWlktC7Q/viewform?usp=dialog')">
+          <span class="nav-button-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
+          <span class="nav-button-text">Evaluate</span>
+        </button>
+
+        <button class="menu-section-element"
+                @click="openLink('https://github.com/MateuszKielan/BachelorThesis_CoW_Interface')">
+          <span class="nav-button-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span>
           <span class="nav-button-text">About</span>
         </button>
 
@@ -90,54 +107,157 @@
     </div>
   </div>
 
-  <div class="main-overlay", id="main-overlay"></div>
+  <div class="main-overlay" id="main-overlay" :class="{ active: sidebarOpen }" @click="sidebarOpen = false"></div>
 
   <!-- Vocabulary Manager Popup (give vocabularies priority) -->
-  <div class="vocabulary-manager-helper-popup" id="vocabulary-manager-helper-popup">
+  <div class="vocabulary-manager-helper-popup" :class="{ 'is-open': activePopup === 'vocabManager' }">
     <div class="vocabulary-manager-popup-content">
       <div class="helper-popup-header-vocabulary-manager">
         <h2 class="helper-popup-title-vocabulary">Vocabulary Manager</h2>
-        <button class="match-close-vocabulary-manager" onclick="closeHelperPopup('vocabulary-manager-helper-popup')">x</button>
+        <button class="match-close-vocabulary-manager" @click="activePopup = null">x</button>
       </div>
       <hr class="solid-separator-popup">
       <div class="vocabulary-manager-helper-popup-body">
         <p class="vocabulary-manager-description">Set the priority order for vocabulary recommendations. Reorder using controls below. When done with the mapping simply press the submit button. The system will take care of the rest.</p>
         <div class="vocabulary-manager-input-field">
-          <input type="text" id="input-vocabulary-manager" placeholder="Enter vocabulary name" class="input-vocabulary-manager" />
-          <button class="add-vocabulary-manager" id="add-vocabulary-manager" onclick="addVocabulary()">Add</button>
+          <input type="text" x-model="vocabInput" placeholder="Enter vocabulary name"
+                 class="input-vocabulary-manager" @keydown.enter.prevent="addVocabulary()" />
+          <button class="add-vocabulary-manager" @click="addVocabulary()">Add</button>
+        </div>
+        <div class="vocabulary-manager-list">
+          <template x-if="vocabList.length === 0">
+            <p class="vocab-empty">No vocabularies added.</p>
+          </template>
+          <template x-for="(name, idx) in vocabList" :key="name">
+            <div class="vocabulary-card">
+              <div class="vocab-left">
+                <div class="vocab-priority" x-text="idx + 1"></div>
+                <div class="vocab-name" x-text="name"></div>
+              </div>
+              <div class="vocab-right">
+                <button class="vocab-up" @click="moveVocabulary(idx, -1)">↑</button>
+                <button class="vocab-down" @click="moveVocabulary(idx, 1)">↓</button>
+                <button class="vocab-delete" @click="removeVocabulary(idx)">X</button>
+              </div>
+            </div>
+          </template>
         </div>
       </div>
       <div class="vocabulary-manager-footer">
-       <button id="submit-vocabulary-manager" class="submit-vocabulary-manager" onclick="submitPriorityList()">Submit</button>
+       <button class="submit-vocabulary-manager" @click="submitPriorityList()">Submit</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Scores explanation popup (opened from the match window) -->
+  <div class="helper-popup helper-popup--top" :class="{ 'is-open': scoresHelp }">
+    <div class="helper-popup-content">
+      <div class="helper-popup-header">
+        <h2 class="helper-popup-title">Understanding the Scores</h2>
+      </div>
+      <div class="helper-popup-body">
+        <p><strong>Match table</strong> (Show Matches) — each row is a candidate term:</p>
+        <p><strong>score</strong> — how closely the term matches the column header, as returned by the Linked Open Vocabularies service. Higher means a more relevant term. The <em>Best Match</em> is the one chosen for that column.</p>
+        <p><strong>Vocabulary Scores</strong> (Show Scores) — ranks whole vocabularies:</p>
+        <p><strong>Average Match Score</strong> — the average term score across all of this vocabulary's matches. Reflects how well the vocabulary's terms fit your columns.</p>
+        <p><strong>Nr of Produced Matches</strong> — how many of your columns this vocabulary has a match for (its coverage).</p>
+        <p><strong>Combi Score</strong> — the combiSQORE ranking: it combines the average match score with coverage, normalised to 0–1, so a vocabulary that fits many columns well ranks highest. This drives the automatic best-match selection.</p>
+      </div>
+      <button class="close-button" @click="scoresHelp = false">Close</button>
+    </div>
+  </div>
+
+  <!-- Tutorial Popup -->
+  <div class="helper-popup" :class="{ 'is-open': activePopup === 'tutorial' }">
+    <div class="helper-popup-content helper-popup-content--scroll">
+      <div class="helper-popup-header">
+        <h2 class="helper-popup-title">How Smart Cow Works</h2>
+      </div>
+      <div class="helper-popup-body tutorial-body">
+        <p class="tutorial-intro">Smart Cow turns a CSV file into linked-data triples. It suggests vocabularies for each column, lets you fine-tune the metadata, and exports the result as N-Quads. Here is what each part does:</p>
+
+        <h3 class="tutorial-section">1. Load Dataset</h3>
+        <p>Start by uploading a CSV on the welcome screen (or <strong>Load Dataset</strong> in the menu). Smart Cow detects the delimiter, reads the column headers, and queries the Linked Open Vocabularies (LOV) service for matching vocabularies. This can take a moment while it contacts LOV.</p>
+
+        <h3 class="tutorial-section">2. CSV Preview (left panel)</h3>
+        <p>Shows the first rows of your file so you can confirm it was parsed correctly. Use <strong>Load Full Dataset</strong> to view every row in a popup.</p>
+
+        <h3 class="tutorial-section">3. Vocabulary Recommender (middle panel)</h3>
+        <p><strong>Request type</strong> — <em>Homogenous</em> tries to find one vocabulary that fits all columns; <em>Single</em> picks the best match for each column independently.</p>
+        <p><strong>Replace All</strong> — fills the metadata with the recommended best match for every column at once.</p>
+        <p><strong>Header cards &amp; Search</strong> — each card is a column. Click <strong>Show Matches</strong> (or search a header name) to open the match window. <strong>Vocabulary Scores</strong> shows how each vocabulary was ranked.</p>
+
+        <h3 class="tutorial-section">4. Match window</h3>
+        <p>Lists the <strong>Best Match</strong> and <strong>All Matches</strong> for a column. Click a row to <strong>Insert</strong> it into the metadata, or open its <strong>Source</strong> URI. The window can be resized from its top edge.</p>
+
+        <h3 class="tutorial-section">5. Metadata editor (right panel)</h3>
+        <p>Toggle between <strong>Editor</strong> and <strong>Raw JSON</strong>. The Editor groups everything into blocks: <em>General</em> (base URL, language), <em>Dataset</em> (title, publisher, license), <em>Table Schema</em> (primary key, about URL), <em>Namespaces</em>, and <em>Columns</em>. Edits sync to the Raw JSON when you switch views or save.</p>
+
+        <h3 class="tutorial-section">6. Vocabulary Manager</h3>
+        <p>Define a preferred order of vocabularies. On <strong>Submit</strong>, Smart Cow re-selects each column's best match, preferring your prioritised vocabularies (falling back to the ranking when there is no match). No new requests are made.</p>
+
+        <h3 class="tutorial-section">7. Save &amp; Export</h3>
+        <p><strong>Save</strong> writes your metadata edits to disk. <strong>Convert</strong> (or <strong>Export Data</strong>) generates the N-Quads, and a download link appears in the notification. Always Save before Convert so your edits are included.</p>
+
+        <h3 class="tutorial-section">Extras</h3>
+        <p><strong>Color Blind mode</strong> switches to a higher-contrast palette. The <strong>?</strong> buttons give quick contextual hints, and <strong>Support</strong> lets you send feedback.</p>
+      </div>
+      <button class="close-button" @click="activePopup = null">Close</button>
+    </div>
+  </div>
+
+  <!-- Configure Endpoint (feature unavailable) Popup -->
+  <div class="helper-popup" :class="{ 'is-open': activePopup === 'configureEndpoint' }">
+    <div class="helper-popup-content">
+      <div class="helper-popup-header">
+        <h2 class="helper-popup-title">Configure Endpoint</h2>
+      </div>
+      <div class="helper-popup-body">
+        <p>This feature is currently unavailable. Custom endpoint configuration is coming in a future release.</p>
+      </div>
+      <button class="close-button" @click="activePopup = null">Close</button>
     </div>
   </div>
 
   <!-- Nav Search Helper Popup (quick search from navbar) -->
-  <div class="helper-popup" id="nav-search-helper">
+  <div class="helper-popup" :class="{ 'is-open': activePopup === 'navSearch' }">
     <div class="helper-popup-content">
       <div class="helper-popup-header">
         <h2 class="helper-popup-title">Quick Search</h2>
+        <button class="helper-button" @click="searchHelp = true">?</button>
       </div>
       <div class="helper-popup-body">
-        <input type="text" id="nav-header-search" placeholder="Enter header name" class="header-search" />
-        <div style="margin-top:12px;">
-          <button class="search-button" id="nav-search-submit">Show Matches</button>
-          <button class="close-button" onclick="closeHelperPopup('nav-search-helper')">Close</button>
+        <input type="text" x-model="searchValue" placeholder="Enter header name"
+               class="header-search" @keydown.enter="loadMatches(searchValue); activePopup = null" />
+        <div class="helper-popup-actions">
+          <button class="search-button" @click="loadMatches(searchValue); activePopup = null">Show Matches</button>
+          <button class="close-button" @click="activePopup = null">Close</button>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Quick Search help overlay (sits above the search popup) -->
+  <div class="helper-popup helper-popup--top" :class="{ 'is-open': searchHelp }">
+    <div class="helper-popup-content">
+      <div class="helper-popup-header">
+        <h2 class="helper-popup-title">Search Help</h2>
+      </div>
+      <div class="helper-popup-body">
+        <p>Type the name of a column header from your CSV (for example <strong>surname</strong>) and press <strong>Show Matches</strong> to see the vocabulary suggestions for that specific column.</p>
+      </div>
+      <button class="close-button" @click="searchHelp = false">Close</button>
+    </div>
+  </div>
+
   <!-- Support Form Popup -->
-  <div class="helper-popup" id="support-form-popup">
+  <div class="helper-popup" :class="{ 'is-open': activePopup === 'support' }">
     <div class="helper-popup-content">
       <div class="helper-popup-header">
         <h2 class="helper-popup-title">Support Request</h2>
       </div>
       <div class="helper-popup-body">
-        <form method="POST" action="{% url 'submit_support' %}" class="support-form">
-          {% csrf_token %}
+        <form class="support-form" @submit.prevent="submitSupport($event)">
           <div class="form-group">
             <input type="text" name="title" placeholder="Title" required class="support-input">
           </div>
@@ -149,7 +269,7 @@
           </div>
           <div style="margin-top:12px;">
             <button type="submit" class="search-button">Submit</button>
-            <button type="button" class="close-button" onclick="closeHelperPopup('support-form-popup')">Close</button>
+            <button type="button" class="close-button" @click="activePopup = null">Close</button>
           </div>
         </form>
       </div>
@@ -158,9 +278,9 @@
 
 
   <div class="converter-container">
-    
+
     <!-- Full Dataset Popup Window-->
-    <div class="popup" id="dataset_popup">
+    <div class="popup" :class="{ 'is-open': showDataset }">
       <div class="dataset_content">
         <div class="popup-header">
           <h2 class="popup-title">Full Dataset</h2>
@@ -183,28 +303,28 @@
             {% endfor %}
           </tbody>
         </table>
-        <button class="close-button" onclick="closeDatasetForm()">Close</button>
+        <button class="close-button" @click="showDataset = false">Close</button>
       </div>
     </div>
     <!-- End Of Full Datase Popup Window-->
 
     <!-- HELPER POPUPS-->
     <!-- Request Type Popup-->
-    <div class="helper-popup" id="request-type-helper"> 
+    <div class="helper-popup" :class="{ 'is-open': activePopup === 'requestType' }">
       <div class="helper-popup-content">
         <div class="helper-popup-header">
-          <h2 class="helper-popup-title" id="helper_title">Request Type</h2>
+          <h2 class="helper-popup-title">Request Type</h2>
         </div>
-        <div class="helper-popup-body" id="helper_body">
+        <div class="helper-popup-body">
           <p><strong>Single:</strong> Returns the best vocabulary suggestion for each column independently.</p>
           <p><strong>Homogenous:</strong> Finds a single vocabulary that works well for all columns together.</p>
         </div>
-        <button class="close-button" onclick="closeHelperPopup('request-type-helper')">Close</button>
+        <button class="close-button" @click="activePopup = null">Close</button>
       </div>
     </div>
 
     <!-- Vocabulary Recommender Helper Popup -->
-    <div class="helper-popup" id="vocabulary-recommender-helper"> 
+    <div class="helper-popup" :class="{ 'is-open': activePopup === 'vocabRecommender' }">
       <div class="helper-popup-content">
         <div class="helper-popup-header">
           <h2 class="helper-popup-title">Vocabulary Recommendations</h2>
@@ -212,47 +332,33 @@
         <div class="helper-popup-body">
           <p>Each card represents a column from your uploaded CSV file. It shows the column name, its detected data type, and how many unique values it contains. Use the 'Show Matches' button to view vocabulary suggestions tailored for that specific column.</p>
         </div>
-        <button class="close-button" onclick="closeHelperPopup('vocabulary-recommender-helper')">Close</button>
+        <button class="close-button" @click="activePopup = null">Close</button>
       </div>
     </div>
-    
-
-    {{ all_matches|json_script:"all-matches-data" }}
-    {{ vocab_coverage_score|json_script:"vocab-coverage-score-data" }}
-    {{ sorted_vocabs|json_script:"sorted-vocabs-data" }}
-    {{ best_match_index|json_script:"best-match-index-data" }}
-    {{ headers|json_script:"headers" }}
-    {{ vocabulary_data|json_script:"vocabulary-data" }}
 
     <!-- Resizable match window -->
-    <div class="match-container" id="matchContainer">
-      <div class="match-resizer" id="matchResizer">...</div>
-      <div class="match-header" id="matchHeader">
-        <h2 class="match-header-text" id="match-header-text">Matches</h2>
-        <button class="match-close" onclick="closeHelperPopup('matchContainer')">x</button>
-      </div>
-      <div class="match-content" id="match-content">
-        <div class="best-match-table" id="best-match-table">
-          <h2 class="he1"> Best Match</h2>
-          <table class="match-table" id="best-match-table-element"></table>
+    <div class="match-container" id="matchContainer" :class="{ 'is-open': showMatches }"
+         x-ref="matchContainer">
+      <div class="match-resizer" id="matchResizer" @mousedown="startResize($event)">...</div>
+      <div class="match-header">
+        <div class="match-header-left">
+          <h2 class="match-header-text" x-text="matchTitle">Matches</h2>
+          <button class="helper-button" @click="scoresHelp = true">?</button>
         </div>
-        <div class="all-match-table">
-          <h2 class="he1"> All Matches</h2>
-          <table class="match-table" id="match-table"></table>
-        </div>
+        <button class="match-close" @click="showMatches = false">x</button>
       </div>
+      <!-- htmx swaps match/vocabulary fragments into this container -->
+      <div class="match-content" id="match-content"></div>
     </div>
 
-    <div class="insert-popup" id="insert-popup">
+    <!-- Insert action popup -->
+    <div class="insert-popup" :class="{ 'is-open': showInsert }">
       <div class="insert-popup-content">
         <h2>Select Action</h2>
         <div class="insert-popup-buttons">
-          <form method="POST" class="insert-match-form" action="{% url 'insert_match' %}">
-            {% csrf_token %}
-            <button class="insert-btn" id="insert-btn">Insert</button>
-          </form>
-          <button class="source-btn" id="source-btn">Source</button>
-          <button class="cancel-btn" id="cancel-btn" onclick="closeHelperPopup('insert-popup')">Cancel</button>
+          <button class="insert-btn" @click="doInsert()">Insert</button>
+          <button class="source-btn" @click="openSource()">Source</button>
+          <button class="cancel-btn" @click="showInsert = false">Cancel</button>
         </div>
       </div>
     </div>
@@ -261,7 +367,7 @@
     <!-- LEFT: CSV Preview -->
     <section class="panel panel-left">
       <h2 class="panel-title">CSV Preview</h2>
-      
+
       <!-- Dynamically initialize the csv table preview -->
       <table class="csv-table">
         <thead>
@@ -281,9 +387,9 @@
           {% endfor %}
         </tbody>
       </table>
-    
-      <button type="button" class="load-button" onclick="openDatasetForm()">Load Full Dataset</button>
-  
+
+      <button type="button" class="load-button" @click="showDataset = true">Load Full Dataset</button>
+
     </section>
 
     <!-- MIDDLE: Vocabulary Recommender -->
@@ -295,7 +401,7 @@
       <hr class="solid-separator">
       <div class="request-type-separator">
         <p class="sub-title">Choose Request type</p>
-        <button class="helper-button" onclick="openHelperPopup('request-type-helper')">?</button>
+        <button class="helper-button" @click="openPopup('requestType')">?</button>
       </div>
       <hr class="solid-separator">
 
@@ -305,11 +411,11 @@
         <!-- Request Type buttons: Form(Button)-->
         <form method="POST" class='request-type-form' action="{% url 'set_request_type' 'Homogenous' %}">
           {% csrf_token %}
-          <button class="request-type-button {% if request_type == 'Homogenous' %}active{% endif %}" id="homogenous-button">Homogenous</button>
+          <button class="request-type-button {% if request_type == 'Homogenous' %}active{% endif %}">Homogenous</button>
         </form>
-        <form method="POST" class="request-type-form"action="{% url 'set_request_type' 'Single' %}">
+        <form method="POST" class="request-type-form" action="{% url 'set_request_type' 'Single' %}">
           {% csrf_token %}
-          <button class="request-type-button {% if request_type == 'Single' %}active{% endif %}" id="single-button">Single</button>
+          <button class="request-type-button {% if request_type == 'Single' %}active{% endif %}">Single</button>
         </form>
 
       </div>
@@ -319,20 +425,21 @@
           {% csrf_token %}
           <button class="replace-all-button">Replace All</button>
         </form>
-        
+
       </div>
 
       <!-- Bottom subtitle with the helper button -->
       <hr class="solid-separator">
       <div class="request-type-separator">
         <p class="sub-title">Vocabulary Recommender Results</p>
-        <button class="helper-button" onclick="openHelperPopup('vocabulary-recommender-helper')">?</button>
+        <button class="helper-button" @click="openPopup('vocabRecommender')">?</button>
       </div>
       <hr class="solid-separator">
 
       <div class="search-block">
-        <input type="text" class="header-search" id="header-search" placeholder="Enter header name">
-        <button class="search-button" id="search-button">Show Matches</button>
+        <input type="text" class="header-search" x-model="searchValue" placeholder="Enter header name"
+               @keydown.enter="loadMatches(searchValue)">
+        <button class="search-button" @click="loadMatches(searchValue)">Show Matches</button>
       </div>
 
       <!-- Card Section -->
@@ -342,9 +449,9 @@
         <div class="card">
           <h4><strong>Vocabulary Scores</strong></h4>
           <p>Vocabularies: </p>
-          <button class="card-button" id='vocab-card-button'>Show Scores</button>
+          <button class="card-button" @click="loadVocabRanking()">Show Scores</button>
         </div>
-      
+
         <!-- Header Cards -->
         {% for header in headers %}
           <div class="card">
@@ -354,38 +461,167 @@
                 <p>Type: {{ header }}  |  Matches: {{ value }} </p>
               {% endif %}
             {% endfor %}
-            <button class="card-button" id="card-button" data-header="{{ header }}">Show Matches</button>
+            <button class="card-button" @click="loadMatches('{{ header|escapejs }}')">Show Matches</button>
           </div>
         {% endfor %}
-      
+
       </div>
 
     </section>
 
-    <!-- RIGHT: JSON Preview -->
+    <!-- RIGHT: JSON Preview / Metadata editor -->
     <section class="panel panel-right">
 
-      <h2 class="panel-title">JSON Preview</h2>
+      <div class="json-header-row">
+        <h2 class="panel-title json-panel-title">Metadata</h2>
+        <!-- View toggle: raw JSON vs structured editor -->
+        <div class="json-view-toggle">
+          <button class="json-toggle-btn" :class="{ active: jsonView === 'structured' }"
+                  @click="setJsonView('structured')">Editor</button>
+          <button class="json-toggle-btn" :class="{ active: jsonView === 'raw' }"
+                  @click="setJsonView('raw')">Raw JSON</button>
+        </div>
+      </div>
 
       <!-- JSON text editing area -->
       <div class="json-preview-container">
-        <form method="POST" class='save-file-form' action="{% url 'save_file' %}">
-          {% csrf_token %}
-          
-          <textarea name="json_text" class="json-textarea" id="jsonPreview" placeholder="JSON content will appear here...">{{ json_content }}</textarea>
 
-          <!-- Buttons to save and convert -->
-          <div class="json-buttons">
-              <button class="json-button save-button" type="submit">Save</button>
-            </form>
-            <button class="json-button convert-button" onclick="triggerNQuadsConversion()">Convert</button>
+        <!-- RAW view -->
+        <textarea x-show="jsonView === 'raw'" name="json_text" class="json-textarea" id="jsonPreview"
+                  x-model="jsonText" placeholder="JSON content will appear here...">{{ json_content }}</textarea>
+
+        <!-- STRUCTURED view -->
+        <div class="metadata-editor" x-show="jsonView === 'structured'" x-cloak>
+
+          <!-- General -->
+          <div class="editor-block">
+            <h3 class="editor-block-title">General</h3>
+            <label class="editor-field">
+              <span>Base URL</span>
+              <input type="text" x-model="settingsObj['@base']" placeholder="https://example.com/id/">
+            </label>
+            <label class="editor-field">
+              <span>Language</span>
+              <input type="text" x-model="settingsObj['@language']" placeholder="en">
+            </label>
           </div>
 
-        </form>
+          <!-- Dataset descriptors -->
+          <div class="editor-block">
+            <h3 class="editor-block-title">Dataset</h3>
+            <label class="editor-field">
+              <span>Title (dc:title)</span>
+              <input type="text" x-model="meta['dc:title']" placeholder="Dataset title">
+            </label>
+            <label class="editor-field">
+              <span>Publisher (schema:name)</span>
+              <input type="text" x-model="publisher['schema:name']" placeholder="Publisher name">
+            </label>
+            <label class="editor-field">
+              <span>License URL (dc:license)</span>
+              <input type="text" x-model="license['@id']" placeholder="http://opendefinition.org/licenses/cc-by/">
+            </label>
+          </div>
+
+          <!-- Table schema -->
+          <div class="editor-block">
+            <h3 class="editor-block-title">Table Schema</h3>
+            <label class="editor-field">
+              <span>Primary Key</span>
+              <select x-model="tableSchema.primaryKey">
+                <option value="">— none —</option>
+                <template x-for="col in columns" :key="col.name">
+                  <option :value="col.name" x-text="col.name"></option>
+                </template>
+              </select>
+            </label>
+            <label class="editor-field">
+              <span>About URL</span>
+              <input type="text" x-model="tableSchema.aboutUrl" placeholder="{_row}">
+            </label>
+          </div>
+
+          <!-- Namespaces -->
+          <div class="editor-block">
+            <div class="editor-block-head">
+              <h3 class="editor-block-title">Namespaces</h3>
+              <button class="editor-add-btn" @click="addNamespace()">+ Add</button>
+            </div>
+            <template x-if="namespaces.length === 0">
+              <p class="editor-empty">No namespaces defined.</p>
+            </template>
+            <template x-for="(ns, i) in namespaces" :key="i">
+              <div class="namespace-row">
+                <input type="text" class="ns-prefix" x-model="ns.prefix" placeholder="prefix">
+                <input type="text" class="ns-uri" x-model="ns.uri" placeholder="http://...">
+                <button class="ns-delete" @click="removeNamespace(i)">×</button>
+              </div>
+            </template>
+          </div>
+
+          <!-- Columns -->
+          <div class="editor-block">
+            <h3 class="editor-block-title">Columns</h3>
+            <template x-for="(col, i) in columns" :key="i">
+              <div class="column-card">
+                <button class="column-card-head" @click="toggleColumn(i)">
+                  <span class="column-name" x-text="col.name || '(unnamed column)'"></span>
+                  <span class="column-vocab" x-text="col.vocab || ''"></span>
+                  <span class="column-chevron" x-text="isColumnOpen(i) ? '▾' : '▸'"></span>
+                </button>
+                <div class="column-card-body" x-show="isColumnOpen(i)">
+                  <label class="editor-field">
+                    <span>Prefixed name</span>
+                    <input type="text" x-model="col.prefixedName">
+                  </label>
+                  <label class="editor-field">
+                    <span>@id</span>
+                    <input type="text" x-model="col['@id']">
+                  </label>
+                  <label class="editor-field">
+                    <span>Property URL</span>
+                    <input type="text" x-model="col.propertyUrl">
+                  </label>
+                  <label class="editor-field">
+                    <span>Vocabulary</span>
+                    <input type="text" x-model="col.vocab">
+                  </label>
+                  <label class="editor-field">
+                    <span>Datatype</span>
+                    <input type="text" x-model="col.datatype" placeholder="string">
+                  </label>
+                  <label class="editor-field">
+                    <span>Type</span>
+                    <select x-model="col.type">
+                      <option value="property">property</option>
+                      <option value="class">class</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+            </template>
+          </div>
+
+        </div>
+
+        <!-- Buttons to save and convert -->
+        <div class="json-buttons">
+          <button class="json-button save-button" @click="saveFile()">Save</button>
+          <button class="json-button convert-button" @click="convert()">Convert</button>
+        </div>
       </div>
 
     </section>
 
+  </div>
+
+  <!-- Toast notifications -->
+  <div class="toast" :class="toast.type" x-show="toast.show" x-cloak x-transition
+       @click="toast.show = false">
+    <span x-text="toast.message"></span>
+    <template x-if="toast.downloadUrl">
+      <a class="toast-link" :href="toast.downloadUrl">Download</a>
+    </template>
   </div>
 
   <script src="{% static 'converter/main.js' %}"></script>

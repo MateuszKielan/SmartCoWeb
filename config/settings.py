@@ -13,6 +13,30 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 
+# Load variables from a local .env file in development (no-op if not installed
+# or the file is absent, e.g. on a production host that injects real env vars).
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv()
+except ImportError:
+    pass
+
+
+def env_bool(name: str, default: bool) -> bool:
+    """Read a boolean environment variable ("1/true/yes" -> True)."""
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def env_list(name: str) -> list:
+    """Read a comma-separated environment variable into a list of strings."""
+    raw = os.environ.get(name, "")
+    return [item.strip() for item in raw.split(",") if item.strip()]
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -23,12 +47,24 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-^^12#j1oub9%&hfut(4$8x620976*485i%ijh0(a)zfakov(@^"
+# Falls back to an insecure key for local development only.
+SECRET_KEY = os.environ.get(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-^^12#j1oub9%&hfut(4$8x620976*485i%ijh0(a)zfakov(@^",
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env_bool("DJANGO_DEBUG", True)
 
-ALLOWED_HOSTS = []
+# Hosts/domains the site may be served from, e.g.
+# DJANGO_ALLOWED_HOSTS="smartcow.onrender.com,localhost,127.0.0.1"
+ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS") or (
+    ["localhost", "127.0.0.1"] if DEBUG else []
+)
+
+# Origins trusted for CSRF on HTTPS deployments (full scheme + host), e.g.
+# DJANGO_CSRF_TRUSTED_ORIGINS="https://smartcow.onrender.com"
+CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
 
 
 # Application definition
@@ -45,6 +81,9 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    # WhiteNoise serves static files directly from the app process so no
+    # separate web server or object storage is needed on free hosts.
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -148,6 +187,47 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = "static/"
+
+# Destination for `collectstatic` in production; served by WhiteNoise.
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Compress and hash static files for long-term caching in production.
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        if not DEBUG
+        else "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+# Cache used to hold large per-upload recommender results out of the session.
+# See converter/storage.py. LocMemCache is per-process and fine for a single
+# free-tier instance; swap for Redis/Memcached if you scale horizontally.
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "smartcow-recommender-cache",
+        "TIMEOUT": 60 * 60,  # results expire after 1 hour
+        "OPTIONS": {"MAX_ENTRIES": 1000},
+    }
+}
+
+# Keep only small identifiers in the session; bulk data lives in the cache.
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
+
+# Allow reasonably large CSV uploads (default Django limit is 2.5 MB).
+DATA_UPLOAD_MAX_MEMORY_SIZE = 25 * 1024 * 1024  # 25 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 25 * 1024 * 1024  # 25 MB
+
+# HTTPS-related hardening, enabled automatically when DEBUG is off.
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = env_bool("DJANGO_SECURE_SSL_REDIRECT", True)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

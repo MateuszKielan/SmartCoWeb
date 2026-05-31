@@ -1,0 +1,20 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Smart Cow — Error</title>
+    <link rel="stylesheet" href="{% static 'converter/styles.css' %}">
+    <link rel="icon" href="{% static 'converter/cow.ico' %}" type="image/x-icon">
+</head>
+<body>
+    <div class="screen-container">
+        <div class="form-box">
+            <h1 class="welcome_title">Something went wrong</h1>
+            <p style="text-align:center;">{{ message|default:"An unexpected error occurred." }}</p>
+            <a href="{% url 'welcome' %}" class="file-button" style="text-decoration:none;">Back to start</a>
+        </div>
+    </div>
+</body>
+</html>

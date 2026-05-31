@@ -23,6 +23,14 @@ logger = logging.getLogger(__name__)
 # MAYBE CHANGE THE NAME AS WELL
 recommender_url = "https://lov.linkeddata.es/dataset/lov/api/v2/term/search"
 
+# The public LOV endpoint is frequently slow (20s+ for a single query), so give
+# it a generous timeout. Override with the LOV_TIMEOUT environment variable.
+import os
+REQUEST_TIMEOUT = int(os.environ.get("LOV_TIMEOUT", "30"))
+
+# Empty-but-valid response shape so downstream code can always read ["results"].
+_EMPTY_RESULT = {"results": []}
+
 
 def get_recommendations(header: str, size: int) -> dict:
     """
@@ -31,32 +39,29 @@ def get_recommendations(header: str, size: int) -> dict:
     Args:
         headers (arr): headers of the csv file
     Returns:
-        results (dict): results of the request for the given header
-
+        results (dict): results of the request for the given header.
+                        On any failure returns {"results": []} so callers never
+                        have to special-case the error path.
     """
     params = {
         "q": header,
-        "category": "class", 
+        "category": "class",
         "page_size": size # Manually selected by users
     }
     try:
-        response = requests.get(recommender_url, params=params, timeout=10)
+        response = requests.get(recommender_url, params=params, timeout=REQUEST_TIMEOUT)
         response.raise_for_status()
-        results = response.json()
+        return response.json()
     except requests.exceptions.Timeout:
         logger.warning(f"Timeout when querying API for header: {header}")
-        return []
     except requests.exceptions.ConnectionError:
         logger.warning("Could not connect to the API.")
-        return []
     except requests.exceptions.HTTPError as e:
         logger.warning(f"HTTP error: {e}")
-        return []
     except Exception as e:
         logger.warning(f"Unexpected error: {e}")
-        return []
-    
-    return results
+
+    return _EMPTY_RESULT
 
 
 
@@ -194,13 +199,22 @@ def normalize_scores(scores: tuple[str, int]) -> tuple[str, int]:
         scores (tuple(int,str)): tuple of voacbularies with corresponding normalized scores
     """
     scores_dict = dict(scores)
+
+    # Nothing to normalize (e.g. the LOV API returned no matches at all).
+    if not scores_dict:
+        return []
+
     min_score = min(scores_dict.values())
     max_score = max(scores_dict.values())
+    score_range = max_score - min_score
 
     for vocab in scores_dict:
-        score = scores_dict[vocab]
-        normalized_score = (score - min_score) / (max_score - min_score)
-        scores_dict[vocab] = normalized_score
+        # When every score is equal the range is zero; treat all as 0 to avoid
+        # dividing by zero.
+        if score_range == 0:
+            scores_dict[vocab] = 0.0
+        else:
+            scores_dict[vocab] = (scores_dict[vocab] - min_score) / score_range
 
     return list(scores_dict.items())
 
@@ -330,6 +344,40 @@ def retrieve_combiSQORE_recursion(all_results: dict, vocab_scores: list[tuple], 
             still_unmatched.append(header)
 
     return retrieve_combiSQORE_recursion(all_results, vocab_scores[1:], num_headers, matched, still_unmatched)
+
+
+def rank_with_priority(all_results: dict, sorted_vocabs: list, priority_list: list, num_headers: int) -> dict:
+    """
+    Re-select the best match per header, honouring a user-defined vocabulary
+    priority order. User-prioritised vocabularies are tried first (in the given
+    order); any remaining vocabularies follow in their original combiSQORE order.
+
+    No new requests are made - this reuses the already-retrieved matches.
+
+    Args:
+        all_results (dict): {header: list of matches} (cached recommender output)
+        sorted_vocabs (list): [(vocab, score), ...] ranked by combiSQORE
+        priority_list (list): vocabulary names in the user's preferred order
+        num_headers (int): number of headers/columns
+    Returns:
+        dict: {header: match_index} best-match selection
+    """
+    ranked = [v[0] for v in sorted_vocabs]
+
+    # Priority vocabularies first (de-duplicated), then the rest by combi score.
+    ordered = []
+    for vocab in priority_list:
+        vocab = (vocab or "").strip()
+        if vocab and vocab not in ordered:
+            ordered.append(vocab)
+    for vocab in ranked:
+        if vocab not in ordered:
+            ordered.append(vocab)
+
+    # The recursion iterates the list in order; the score field is unused here.
+    vocab_scores = [(vocab, 0) for vocab in ordered]
+    matched = retrieve_combiSQORE_recursion(all_results, vocab_scores, num_headers)
+    return dict(matched)
 
 
 #--------------------------------------------------------------

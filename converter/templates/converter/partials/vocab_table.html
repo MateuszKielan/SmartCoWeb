@@ -1,0 +1,25 @@
+<div class="vocab-ranking-table">
+  <h2 class="he1">Vocabulary ranking</h2>
+  <table class="match-table">
+    <thead>
+      <tr>
+        <th>Vocabulary</th>
+        <th>Average Match Score</th>
+        <th>Nr of Produced Matches</th>
+        <th>Combi Score</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+        <tr>
+          <td>{{ row.vocab }}</td>
+          <td>{{ row.avg }}</td>
+          <td>{{ row.coverage }}</td>
+          <td>{{ row.combi }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4">No vocabulary data available.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

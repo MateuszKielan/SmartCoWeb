@@ -3,41 +3,37 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Smart Cow</title>
     <link rel="stylesheet" href="{% static 'converter/styles.css' %}">
     <link rel="icon" href="{% static 'converter/cow.ico' %}" type="image/x-icon">
+    <script defer src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js"></script>
 </head>
-<body>
+<body x-data="{ fileName: '{{ file_name|default:'No File Selected'|escapejs }}', loading: false }">
     <!-- Loader screen that is triggered after convert button press -->
-    <div class="loader_page" id="loader_page">
+    <div class="loader_page" id="loader_page" :style="loading ? 'display:flex' : ''">
         <div class="spinner"></div>
         <div class="header-loader">
             Loading
         </div>
     </div>
 
-
     <div class="screen-container">
         <!-- Main Content Block -->
-        <form method="POST" enctype="multipart/form-data" class="form-box">
+        <form method="POST" enctype="multipart/form-data" class="form-box" @submit="loading = true">
             {% csrf_token %}
             <h1 class="welcome_title">Welcome to Smart Cow</h1>
-
-            <input type="text" name="api_endpoint" placeholder="Optional: Insert API endpoint" class="api-input">
+            <p class="welcome_subtitle">Turn your CSV files into linked-data triples with automatic vocabulary recommendations.</p>
 
             <label for="csv_file" class="file-button">Select File</label>
-            <input type="file" name="csv_file" id="csv_file" accept=".csv" class="file-input">
+            <input type="file" name="csv_file" id="csv_file" accept=".csv" class="file-input" required
+                   @change="fileName = $event.target.files.length ? $event.target.files[0].name : 'No File Selected'">
 
             <!-- Dynamically Change the label-->
-            <div class="file-label">
-                {{ file_name | default:"No File Selected" }}
-            </div>
+            <div class="file-label" x-text="fileName"></div>
 
-            <button type="submit" class="convert-button-start" id="convert-button-start" onclick="loadingScreen()">Convert</button>
+            <button type="submit" class="convert-button-start">Convert</button>
         </form>
     </div>
-
-    <!-- Link the JS file -->
-    <script src="{% static 'converter/main.js' %}"></script>
 </body>
 </html>
