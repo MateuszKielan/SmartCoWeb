@@ -66,6 +66,17 @@ ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS") or (
 # DJANGO_CSRF_TRUSTED_ORIGINS="https://smartcow.onrender.com"
 CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
 
+# Render injects the service's real public hostname here (it may carry a random
+# suffix, e.g. "smartcow-2a3w.onrender.com"). Trust it automatically so the app
+# works without manually tracking the generated URL.
+RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+if RENDER_EXTERNAL_HOSTNAME:
+    if RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+    _render_origin = f"https://{RENDER_EXTERNAL_HOSTNAME}"
+    if _render_origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(_render_origin)
+
 
 # Application definition
 
