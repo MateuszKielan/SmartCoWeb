@@ -1,6 +1,3 @@
-# DONT FORGET TO SORT THE IMPORTS PLS 
-from re import X
-from turtle import update
 from django.shortcuts import render, redirect
 from django.conf import settings
 import os
