@@ -400,7 +400,7 @@
       <!-- Upper subtitle with the helper button -->
       <hr class="solid-separator">
       <div class="request-type-separator">
-        <p class="sub-title">Choose Request type</p>
+        <p class="sub-title">Choose Recommendation Type</p>
         <button class="helper-button" @click="openPopup('requestType')">?</button>
       </div>
       <hr class="solid-separator">
@@ -411,7 +411,7 @@
         <!-- Request Type buttons: Form(Button)-->
         <form method="POST" class='request-type-form' action="{% url 'set_request_type' 'Homogenous' %}">
           {% csrf_token %}
-          <button class="request-type-button {% if request_type == 'Homogenous' %}active{% endif %}">Homogenous</button>
+          <button class="request-type-button {% if request_type == 'Homogenous' %}active{% endif %}">Contextual</button>
         </form>
         <form method="POST" class="request-type-form" action="{% url 'set_request_type' 'Single' %}">
           {% csrf_token %}
