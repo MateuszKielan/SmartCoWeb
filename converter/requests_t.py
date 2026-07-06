@@ -21,7 +21,8 @@ logger = logging.getLogger(__name__)
 
 # Lov api url
 # MAYBE CHANGE THE NAME AS WELL
-recommender_url = "https://lov.linkeddata.es/dataset/lov/api/v2/term/search"
+# The API moved from /dataset/lov/api/... to /dataset/api/... (the old path 404s).
+recommender_url = "https://lov.linkeddata.es/dataset/api/v2/term/search"
 
 # The public LOV endpoint is frequently slow (20s+ for a single query), so give
 # it a generous timeout. Override with the LOV_TIMEOUT environment variable.
@@ -43,9 +44,12 @@ def get_recommendations(header: str, size: int) -> dict:
                         On any failure returns {"results": []} so callers never
                         have to special-case the error path.
     """
+    # Note: the filter parameter on this endpoint is "type" (class/property),
+    # not "category". We deliberately do not filter: for CSV column headers the
+    # best matches are usually properties (e.g. foaf:surname), and the user can
+    # see the type of each match in the results table.
     params = {
         "q": header,
-        "category": "class",
         "page_size": size # Manually selected by users
     }
     try:
@@ -82,7 +86,7 @@ def display_results(result: dict, name: str):
    
         print(f"-------Match {count + 1}--------")
         print(matches[count]['prefixedName'])
-        print(matches[count]['vocabulary.prefix'])
+        print(matches[count]['vocabulary']['prefix'])
         print(matches[count]['uri'])
         print(matches[count]['type'])
         print(matches[count]['score'])
@@ -122,7 +126,7 @@ def organize_results(result: dict) -> list:
 
         sub_match = []
         sub_match.append(matches[id]['prefixedName'])
-        sub_match.append(matches[id]['vocabulary.prefix'][0])
+        sub_match.append(matches[id]['vocabulary']['prefix'])
         sub_match.append(matches[id]['uri'])
         sub_match.append(matches[id]['type'])
         sub_match.append(matches[id]['score'])
