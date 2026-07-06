@@ -8,7 +8,11 @@ logger = logging.getLogger(__name__)
 
 # Cap on concurrent outbound requests to the LOV API. Keeps us from hammering
 # the public endpoint while still collapsing N serial round-trips into a few.
-MAX_LOV_WORKERS = 8
+# The executor is shared by all requests so the cap is service-wide: ten users
+# uploading at once queue their header lookups here instead of opening
+# 10 x MAX_LOV_WORKERS connections to LOV from one IP.
+MAX_LOV_WORKERS = 16
+_LOV_EXECUTOR = ThreadPoolExecutor(max_workers=MAX_LOV_WORKERS)
 
 class Engine:
     def __init__(self, headers) -> None:
@@ -71,14 +75,13 @@ class Engine:
                 logger.warning(f"LOV error for header '{header}': {e}")
                 return header, []
 
-        # Query the LOV API for every header concurrently. The results are
-        # reassembled in the original header order so downstream scoring is
-        # deterministic regardless of which request finishes first.
+        # Query the LOV API for every header concurrently on the shared,
+        # service-wide executor. The results are reassembled in the original
+        # header order so downstream scoring is deterministic regardless of
+        # which request finishes first.
         results_by_header = {}
-        workers = max(1, min(MAX_LOV_WORKERS, len(self.headers)))
-        with ThreadPoolExecutor(max_workers=workers) as executor:
-            for header, matches in executor.map(fetch, self.headers):
-                results_by_header[header] = matches
+        for header, matches in _LOV_EXECUTOR.map(fetch, self.headers):
+            results_by_header[header] = matches
 
         self.all_results = {header: results_by_header[header] for header in self.headers}
 

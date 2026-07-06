@@ -8,8 +8,10 @@ services:
     region: frankfurt          
     buildCommand: "./build.sh"
     # Single worker so the in-process recommender cache (LocMemCache) is shared;
-    # threads handle concurrent requests and the slow LOV lookups.
-    startCommand: "gunicorn config.wsgi --workers 1 --threads 4 --timeout 120"
+    # threads handle concurrent requests. Requests spend most of their time
+    # blocked on the slow LOV API, so 12 I/O-bound threads let ~10 users
+    # upload at the same time without queueing behind each other.
+    startCommand: "gunicorn config.wsgi --workers 1 --threads 12 --timeout 120"
     envVars:
       - key: DJANGO_SECRET_KEY
         generateValue: true     

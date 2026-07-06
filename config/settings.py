@@ -130,6 +130,15 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
+        # Concurrent visitors all write session rows to this one SQLite file.
+        # WAL lets readers proceed during a write, IMMEDIATE avoids deadlocks
+        # on upgrade from read to write, and the busy timeout makes writers
+        # queue instead of raising "database is locked".
+        "OPTIONS": {
+            "timeout": 20,
+            "init_command": "PRAGMA journal_mode=WAL;",
+            "transaction_mode": "IMMEDIATE",
+        },
     }
 }
 

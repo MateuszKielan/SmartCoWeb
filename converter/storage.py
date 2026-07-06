@@ -9,7 +9,7 @@ heavy payload in Django's cache, keyed by that id.
 
 Note: the default cache backend is per-process ``LocMemCache``. Run the app with
 a single Gunicorn worker (and multiple threads) so writes and reads share the
-same process memory, e.g. ``gunicorn config.wsgi --workers 1 --threads 4``.
+same process memory, e.g. ``gunicorn config.wsgi --workers 1 --threads 12``.
 Swap in a shared backend (Redis/Memcached/DatabaseCache) to scale out.
 """
 

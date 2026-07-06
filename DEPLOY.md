@@ -8,7 +8,7 @@ These files are already in the repo:
 - `requirements.txt` — includes `gunicorn` and `whitenoise`.
 
 The start command runs a **single Gunicorn worker** with threads:
-`gunicorn config.wsgi --workers 1 --threads 4 --timeout 120`
+`gunicorn config.wsgi --workers 1 --threads 12 --timeout 120`
 (one worker so the in-process recommender cache is shared; the 120s timeout covers the slow LOV lookups).
 
 ---
@@ -64,7 +64,7 @@ Save → Convert → download the `.nq`. Then share the link.
 ## Manual setup (without the Blueprint)
 If you'd rather create the service by hand: **New + → Web Service**, pick the repo, then set
 - Build Command: `./build.sh`
-- Start Command: `gunicorn config.wsgi --workers 1 --threads 4 --timeout 120`
+- Start Command: `gunicorn config.wsgi --workers 1 --threads 12 --timeout 120`
 - Environment: `DJANGO_SECRET_KEY` (any long random string), `DJANGO_DEBUG=False`,
   `DJANGO_ALLOWED_HOSTS=<app>.onrender.com`,
   `DJANGO_CSRF_TRUSTED_ORIGINS=https://<app>.onrender.com`,
