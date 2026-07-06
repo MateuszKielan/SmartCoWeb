@@ -285,24 +285,26 @@
         <div class="popup-header">
           <h2 class="popup-title">Full Dataset</h2>
         </div>
-        <table class="csv-table">
-          <thead>
-            <tr>
-              {% for header in headers %}
-                <th>{{ header }}</th>
-              {% endfor %}
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in full_table %}
+        <div class="csv-table-wrapper">
+          <table class="csv-table">
+            <thead>
               <tr>
-                {% for cell in row %}
-                  <td>{{ cell }}</td>
+                {% for header in headers %}
+                  <th>{{ header }}</th>
                 {% endfor %}
               </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {% for row in full_table %}
+                <tr>
+                  {% for cell in row %}
+                    <td>{{ cell }}</td>
+                  {% endfor %}
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
         <button class="close-button" @click="showDataset = false">Close</button>
       </div>
     </div>
@@ -369,24 +371,26 @@
       <h2 class="panel-title">CSV Preview</h2>
 
       <!-- Dynamically initialize the csv table preview -->
-      <table class="csv-table">
-        <thead>
-          <tr>
-            {% for header in headers %}
-              <th>{{ header }}</th>
-            {% endfor %}
-          </tr>
-        </thead>
-        <tbody>
-          {% for row in rows %}
+      <div class="csv-table-wrapper">
+        <table class="csv-table">
+          <thead>
             <tr>
-              {% for cell in row %}
-                <td>{{ cell }}</td>
+              {% for header in headers %}
+                <th>{{ header }}</th>
               {% endfor %}
             </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {% for row in rows %}
+              <tr>
+                {% for cell in row %}
+                  <td>{{ cell }}</td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
 
       <button type="button" class="load-button" @click="showDataset = true">Load Full Dataset</button>
 

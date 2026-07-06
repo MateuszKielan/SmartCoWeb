@@ -401,19 +401,23 @@ body, html {
   /* Left Panel: CSV */
   .panel-left {
     flex: 1;
+    min-width: 0; /* let the panel keep its flex share instead of growing with the table */
     background-color: #fafafa;
     border-right: 1px solid #ccc;
   }
-  
+
 
   /* Table styling */
+  .csv-table-wrapper {
+    overflow-x: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
   .csv-table {
     font-family: Arial, sans-serif;
     border-collapse: collapse;
     width: 100%;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
 
   .csv-table th,
@@ -421,6 +425,7 @@ body, html {
     border: 1px solid #dddddd;
     text-align: left;
     padding: 8px;
+    white-space: nowrap; /* keep natural column widths; wide tables scroll instead of squeezing */
   }
 
   .csv-table th {
@@ -732,11 +737,10 @@ body, html {
 
 /* Styles for the popup windows */
 /* Popup table styling */
-.popup .csv-table {
-  width: 85%;
+.popup .csv-table-wrapper {
+  max-width: 85%;
   margin: 20px auto;
   border-radius: 8px;
-  overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
