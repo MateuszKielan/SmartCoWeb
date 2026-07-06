@@ -75,8 +75,9 @@ def update_metadata(path, headers, all_results, request_results, mode, custom_en
         if header in all_results and header in index_lookup:
             match = all_results[header][index_lookup[header]]
 
-            prefixed_name = match[0][0] if custom_endpoint == "" else match[0]
-            uri = match[2][0] if custom_endpoint == "" else match[2]
+            # Matches hold plain strings (see organize_results), no unwrapping needed.
+            prefixed_name = match[0]
+            uri = match[2]
 
             column.update({
                 'name': header,
