@@ -231,9 +231,10 @@ function smartcow() {
 
             // Dataset descriptors. Ensure the parent objects exist so the editor
             // can bind to their sub-keys.
-            this.publisher = (this.meta['dc:publisher'] && typeof this.meta['dc:publisher'] === 'object')
-                ? this.meta['dc:publisher']
-                : (this.meta['dc:publisher'] = {});
+            const pub = this.meta['dc:publisher'];
+            this.publisher = (pub && typeof pub === 'object')
+                ? pub
+                : (this.meta['dc:publisher'] = { 'schema:name': typeof pub === 'string' ? pub : '' });
             const lic = this.meta['dc:license'];
             this.license = (lic && typeof lic === 'object')
                 ? lic

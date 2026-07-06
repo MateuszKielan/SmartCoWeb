@@ -120,8 +120,18 @@
       <div class="vocabulary-manager-helper-popup-body">
         <p class="vocabulary-manager-description">Set the priority order for vocabulary recommendations. Reorder using controls below. When done with the mapping simply press the submit button. The system will take care of the rest.</p>
         <div class="vocabulary-manager-input-field">
-          <input type="text" x-model="vocabInput" placeholder="Enter vocabulary name"
-                 class="input-vocabulary-manager" @keydown.enter.prevent="addVocabulary()" />
+          {% if sorted_vocabs %}
+            <select x-model="vocabInput" class="input-vocabulary-manager">
+              <option value="" disabled selected>Select a vocabulary…</option>
+              {% for vocab in sorted_vocabs %}
+                <option value="{{ vocab.0 }}">{{ vocab.0 }}</option>
+              {% endfor %}
+            </select>
+          {% else %}
+            <!-- No recommender results available (e.g. cache expired): fall back to free text. -->
+            <input type="text" x-model="vocabInput" placeholder="Enter vocabulary name"
+                   class="input-vocabulary-manager" @keydown.enter.prevent="addVocabulary()" />
+          {% endif %}
           <button class="add-vocabulary-manager" @click="addVocabulary()">Add</button>
         </div>
         <div class="vocabulary-manager-list">
